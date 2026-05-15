@@ -1,4 +1,4 @@
-package main
+package models
 
 type User struct {
 	UID string `gorm:"unique"`

@@ -5,6 +5,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"auth/config"
+	"auth/models"
 )
 
 func main(){
@@ -13,10 +14,10 @@ func main(){
 		panic(err);
 	}
 
-	// err := config.InitDatabase();
-	// if err != nil {
-	// 	panic(err);
-	// }
+	err = config.InitDatabase();
+	if err != nil {
+		panic(err);
+	}
 
 	err = config.InitFirebase();
 	if err != nil {
@@ -30,7 +31,7 @@ func main(){
 	});
 
 	app.Post("/authen", func (c fiber.Ctx) error {
-		var token TokenDTO;
+		var token models.TokenDTO;
 		if err := c.Bind().Body(&token); err != nil {
 			return err;
 		}
@@ -41,7 +42,7 @@ func main(){
 			return c.SendStatus(401);
 		}
 
-		var jwtToken TokenDTO;
+		var jwtToken models.TokenDTO;
 		jwtToken.Token = jwt;
 
 		return c.JSON(jwtToken);

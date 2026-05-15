@@ -1,16 +1,20 @@
 package config
 
 import (
-	// "gorm.io/driver/postgres"
+	"auth/models"
+	"os"
+
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB;
+var DB *gorm.DB;
 
-// func InitDatabase() error {
-// 	var dns string = "https://fqbjupzsgdsyrmsqgtth.supabase.co"
-// 	var err error;
-// 	db, err = gorm.Open(postgres.Open(dns), &gorm.Config{})
+func InitDatabase() error {
+	var dns string = os.Getenv("DATABASE_URL");
+	var err error;
+	DB, err = gorm.Open(postgres.Open(dns), &gorm.Config{});
+	DB.AutoMigrate(&models.User{});
 
-// 	return err;
-// }
+	return err;
+}
