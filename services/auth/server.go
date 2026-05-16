@@ -5,6 +5,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"auth/config"
+	"auth/logic"
 	"auth/models"
 )
 
@@ -30,22 +31,22 @@ func main(){
 		return c.SendString("Hello auth service");
 	});
 
-	app.Post("/authen", func (c fiber.Ctx) error {
+	app.Post("/authen", func (ctx fiber.Ctx) error {
 		var token models.TokenDTO;
-		if err := c.Bind().Body(&token); err != nil {
+		if err := ctx.Bind().Body(&token); err != nil {
 			return err;
 		}
 
-		jwt, err := Authen(token.Token);
+		jwt, err := logic.GoogleAuthen(ctx, token.Token);
 
 		if err != nil {
-			return c.SendStatus(401);
+			return ctx.SendStatus(401);
 		}
 
 		var jwtToken models.TokenDTO;
 		jwtToken.Token = jwt;
 
-		return c.JSON(jwtToken);
+		return ctx.JSON(jwtToken);
 	});
 
 	app.Listen(":3000");

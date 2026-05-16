@@ -12,10 +12,6 @@ import (
 var AuthClient *auth.Client;
 
 func InitFirebase() error {
-	// firebaseJson, err := os.ReadFile("firebase.json");
-	// if err != nil {
-	// 	return err;
-	// }
 	cred := os.Getenv("FIREBASE_CREDENTIALS");
 
 	opt := option.WithCredentialsJSON([]byte(cred));

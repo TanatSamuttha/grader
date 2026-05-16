@@ -5,6 +5,7 @@ type User struct {
 	Google_UID string
 	Email string
 	Username string
+	Version int8
 }
 
 type TokenDTO struct {
