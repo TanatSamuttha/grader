@@ -14,7 +14,7 @@ import (
 func main(){
 	err := godotenv.Load();
 	if err != nil {
-		panic(err);
+		fmt.Println(err);
 	}
 
 	err = config.InitDatabase();
