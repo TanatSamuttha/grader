@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
 
@@ -29,11 +30,18 @@ func main(){
 
 	app := fiber.New();
 
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowCredentials: true,
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+	}));
+
 	app.Get("/", func (c fiber.Ctx) error {
 		return c.SendString("Hello auth service");
 	});
 
-	app.Post("/authen", func (ctx fiber.Ctx) error {
+	app.Post("/authen/google", func (ctx fiber.Ctx) error {
 		var token models.TokenDTO;
 		if err := ctx.Bind().Body(&token); err != nil {
 			return err;
@@ -63,7 +71,7 @@ func main(){
 			Value: "true",
 			HTTPOnly: false,
 			Secure: false,
-			SameSite: "Lax",
+			SameSite: "None",
 			MaxAge: 60 * 60 * 24 *3,
 		});
 

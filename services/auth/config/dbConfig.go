@@ -12,9 +12,13 @@ var DB *gorm.DB;
 
 func InitDatabase() error {
 	var dns string = os.Getenv("DATABASE_URL");
-	var err error;
+	var err error
 	DB, err = gorm.Open(postgres.Open(dns), &gorm.Config{});
+	if err != nil {
+		return err;
+	}
+
 	DB.AutoMigrate(&models.User{});
 
-	return err;
+	return nil;
 }
