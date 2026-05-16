@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
 
@@ -40,13 +42,32 @@ func main(){
 		jwt, err := logic.GoogleAuthen(ctx, token.Token);
 
 		if err != nil {
+			fmt.Println(err);
 			return ctx.SendStatus(401);
 		}
 
 		var jwtToken models.TokenDTO;
 		jwtToken.Token = jwt;
 
-		return ctx.JSON(jwtToken);
+		ctx.Cookie(&fiber.Cookie{
+			Name: "Bearer",
+			Value: jwt,
+			HTTPOnly: true,
+			Secure: false,
+			SameSite: "Lax",
+			MaxAge: 60 * 60 * 24 * 3,
+		});
+
+		ctx.Cookie(&fiber.Cookie{
+			Name: "IsAuthenticated",
+			Value: "true",
+			HTTPOnly: false,
+			Secure: false,
+			SameSite: "Lax",
+			MaxAge: 60 * 60 * 24 *3,
+		});
+
+		return ctx.SendStatus(200);
 	});
 
 	app.Listen(":3000");

@@ -50,7 +50,10 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 		}
 	}
 
-	fmt.Println(decodedToken);
+	jwtToken, err := GenerateToken(user.UID);
+	if err != nil {
+		return "", err;
+	}
 
-	return "token", err;
+	return jwtToken, nil;
 }
