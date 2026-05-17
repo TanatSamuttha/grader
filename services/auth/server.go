@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 
@@ -31,18 +30,11 @@ func main(){
 
 	app := fiber.New();
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowCredentials: true,
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
-		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
-	}));
-
-	app.Get("/", func (ctx fiber.Ctx) error {
+	app.Get("/auth", func (ctx fiber.Ctx) error {
 		return ctx.SendString("Hello auth service");
 	});
 
-	app.Get("/me", logic.VerifyToken, func (ctx fiber.Ctx) error {
+	app.Get("/auth/me", logic.VerifyToken, func (ctx fiber.Ctx) error {
 		uid := ctx.Locals("uid").(string);
 		user, err := gorm.G[models.User](config.DB).Where("uid = ?", uid).First(ctx);
 		userDTO := models.UserDTO{
@@ -56,7 +48,7 @@ func main(){
 		return ctx.JSON(userDTO);
 	})
 
-	app.Post("/authen/google", func (ctx fiber.Ctx) error {
+	app.Post("/auth/google", func (ctx fiber.Ctx) error {
 		var token models.TokenDTO;
 		if err := ctx.Bind().Body(&token); err != nil {
 			return err;
