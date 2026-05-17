@@ -15,6 +15,6 @@ type TokenDTO struct {
 }
 
 type UserDTO struct {
-	Username string
-	PhotoURL string
+	Username string `json:"username"`
+	PhotoURL string `json:"photoURL"`
 }
