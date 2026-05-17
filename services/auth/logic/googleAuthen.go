@@ -12,19 +12,20 @@ import (
 	"gorm.io/gorm"
 )
 
-func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
+func GoogleAuthen(ctx fiber.Ctx, token string) (string, string, string , error) {
 	fmt.Println(token);
 	decodedToken, err := config.AuthClient.VerifyIDToken(
 		context.Background(),
 		token,
 	)
 	if err != nil {
-		return "", err;
+		return "", "", "", err;
 	}
 
 	googleUID := decodedToken.UID;
 	email := decodedToken.Claims["email"].(string);
 	username := decodedToken.Claims["name"].(string);
+	photoURL := decodedToken.Claims["picture"].(string);
 
 	user, err := gorm.G[models.User](config.DB).Where("email = ?", email).First(ctx);
 	if err != nil {
@@ -33,10 +34,10 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, Version: 1};
 			err := gorm.G[models.User](config.DB).Create(ctx, &user);
 			if err != nil {
-				return "", err;
+				return "", "", "", err;
 			}
 		} else {
-			return "", err;
+			return "", "", "", err;
 		}
 	} else if user.Google_UID == ""{
 		user.Google_UID = googleUID;
@@ -46,14 +47,14 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 			panic(err);
 		}
 		if rows == 0 {
-			return "", errors.New("User is just updated"); 
+			return "", "", "", errors.New("User is just updated"); 
 		}
 	}
 
 	jwtToken, err := GenerateToken(user.UID);
 	if err != nil {
-		return "", err;
+		return "", "", "", err;
 	}
 
-	return jwtToken, nil;
+	return jwtToken, username, photoURL, nil;
 }

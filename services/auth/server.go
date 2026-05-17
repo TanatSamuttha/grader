@@ -47,15 +47,12 @@ func main(){
 			return err;
 		}
 
-		jwt, err := logic.GoogleAuthen(ctx, token.Token);
+		jwt, username, photoURL, err := logic.GoogleAuthen(ctx, token.Token);
 
 		if err != nil {
 			fmt.Println(err);
 			return ctx.SendStatus(401);
 		}
-
-		var jwtToken models.TokenDTO;
-		jwtToken.Token = jwt;
 
 		ctx.Cookie(&fiber.Cookie{
 			Name: "Bearer",
@@ -67,8 +64,17 @@ func main(){
 		});
 
 		ctx.Cookie(&fiber.Cookie{
-			Name: "IsAuthenticated",
-			Value: "true",
+			Name: "Username",
+			Value: username,
+			HTTPOnly: false,
+			Secure: false,
+			SameSite: "None",
+			MaxAge: 60 * 60 * 24 *3,
+		});
+
+		ctx.Cookie(&fiber.Cookie{
+			Name: "PhotoURL",
+			Value: photoURL,
 			HTTPOnly: false,
 			Secure: false,
 			SameSite: "None",
