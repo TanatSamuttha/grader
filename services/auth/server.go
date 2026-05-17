@@ -32,7 +32,7 @@ func main(){
 	app := fiber.New();
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{"*"},
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},

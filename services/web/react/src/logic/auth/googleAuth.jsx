@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 import firebaseConfig from "../../config/firebaseConfig.jsx";
 import axios from "axios";
-import getUserData from "./UserData.jsx";
+import getUserData from "./userData.jsx";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

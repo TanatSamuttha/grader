@@ -1,5 +1,10 @@
 services:
 
+  web-server:
+    build: ./services/web
+    ports:
+      - "80:80"
+
   auth-server:
     build: ./services/auth
     env_file:

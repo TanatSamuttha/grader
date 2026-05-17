@@ -1,5 +1,4 @@
 import axios from "axios";
-import saveImage from "./saveImage";
 
 export default async function getUserData(setLoggedIn, setUsername, setPhoto){
     try{

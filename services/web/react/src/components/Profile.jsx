@@ -1,6 +1,6 @@
 import { cache, useEffect, useState } from "react";
 import { googleSignIn } from "../logic/auth/googleAuth.jsx";
-import getUserData from "../logic/auth/UserData.jsx";
+import getUserData from "../logic/auth/userData.jsx";
 
 export default function Profile(){
     const [isLogedIn, setLoggedIn] = useState(false);
