@@ -21,9 +21,9 @@ func GenerateToken(uid string) (string, error) {
 
 	secret := os.Getenv("JWT_SECRET");
 
-	tokenString, err := token.SignedString(secret);
+	tokenString, err := token.SignedString([]byte(secret));
 	if err != nil {
-		return "", nil;
+		return "", err;
 	}
 
 	return  tokenString, nil;

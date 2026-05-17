@@ -5,21 +5,19 @@ import (
 	"auth/models"
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func GoogleAuthen(ctx fiber.Ctx, token string) (string, string, string , error) {
-	fmt.Println(token);
+func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 	decodedToken, err := config.AuthClient.VerifyIDToken(
 		context.Background(),
 		token,
 	)
 	if err != nil {
-		return "", "", "", err;
+		return "", err;
 	}
 
 	googleUID := decodedToken.UID;
@@ -31,13 +29,13 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, string, string , error) 
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			uid := uuid.New();
-			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, Version: 1};
+			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, PhotoURL: photoURL, Version: 1};
 			err := gorm.G[models.User](config.DB).Create(ctx, &user);
 			if err != nil {
-				return "", "", "", err;
+				return "", err;
 			}
 		} else {
-			return "", "", "", err;
+			return "", err;
 		}
 	} else if user.Google_UID == ""{
 		user.Google_UID = googleUID;
@@ -47,14 +45,14 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, string, string , error) 
 			panic(err);
 		}
 		if rows == 0 {
-			return "", "", "", errors.New("User is just updated"); 
+			return "", errors.New("User is just updated"); 
 		}
 	}
 
 	jwtToken, err := GenerateToken(user.UID);
 	if err != nil {
-		return "", "", "", err;
+		return "", err;
 	}
 
-	return jwtToken, username, photoURL, nil;
+	return jwtToken, nil;
 }

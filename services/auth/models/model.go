@@ -1,13 +1,20 @@
 package models
 
 type User struct {
-	UID string `gorm:"unique"`
-	Google_UID string
-	Email string
-	Username string
-	Version int8
+	ID			int8 `gorm:"primaryKey"`
+	UID 		string `gorm:"unique"`
+	Google_UID 	string
+	Email 		string
+	Username 	string
+	PhotoURL 	string
+	Version 	int8
 }
 
 type TokenDTO struct {
 	Token string `json:"token"`
+}
+
+type UserDTO struct {
+	Username string
+	PhotoURL string
 }

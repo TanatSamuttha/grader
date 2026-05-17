@@ -16,6 +16,7 @@ export async function googleSignIn() {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
     const token = await user.getIdToken();
+    console.log(user);
     const response = await axios.post("http://localhost:3000/authen/google", {
             token: token
         },

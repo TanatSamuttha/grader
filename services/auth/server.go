@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 
 	"auth/config"
 	"auth/logic"
@@ -37,9 +38,23 @@ func main(){
 		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
 	}));
 
-	app.Get("/", func (c fiber.Ctx) error {
-		return c.SendString("Hello auth service");
+	app.Get("/", func (ctx fiber.Ctx) error {
+		return ctx.SendString("Hello auth service");
 	});
+
+	app.Get("/me", logic.VerifyToken, func (ctx fiber.Ctx) error {
+		uid := ctx.Locals("uid").(string);
+		user, err := gorm.G[models.User](config.DB).Where("uid = ?", uid).First(ctx);
+		userDTO := models.UserDTO{
+			Username: user.Username,
+			PhotoURL: user.PhotoURL,
+		};
+		if err != nil {
+			fmt.Println(err);
+			return ctx.SendStatus(401);
+		}
+		return ctx.JSON(userDTO);
+	})
 
 	app.Post("/authen/google", func (ctx fiber.Ctx) error {
 		var token models.TokenDTO;
@@ -47,7 +62,7 @@ func main(){
 			return err;
 		}
 
-		jwt, username, photoURL, err := logic.GoogleAuthen(ctx, token.Token);
+		jwt, err := logic.GoogleAuthen(ctx, token.Token);
 
 		if err != nil {
 			fmt.Println(err);
@@ -61,24 +76,6 @@ func main(){
 			Secure: false,
 			SameSite: "Lax",
 			MaxAge: 60 * 60 * 24 * 3,
-		});
-
-		ctx.Cookie(&fiber.Cookie{
-			Name: "Username",
-			Value: username,
-			HTTPOnly: false,
-			Secure: false,
-			SameSite: "None",
-			MaxAge: 60 * 60 * 24 *3,
-		});
-
-		ctx.Cookie(&fiber.Cookie{
-			Name: "PhotoURL",
-			Value: photoURL,
-			HTTPOnly: false,
-			Secure: false,
-			SameSite: "None",
-			MaxAge: 60 * 60 * 24 *3,
 		});
 
 		return ctx.SendStatus(200);
