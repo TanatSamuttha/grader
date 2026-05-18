@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
+	"problems/config"
 	"problems/models"
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func NewProblem(ctx fiber.Ctx) error {
@@ -23,24 +25,39 @@ func NewProblem(ctx fiber.Ctx) error {
 	author := ctx.Locals("uid").(string);
 	problemID := uuid.New();
 
-	problemPDF := ctx.FormFile("problem");
-	testcasesZip := ctx.FormFile("testcases");
+	problemPDF, err := ctx.FormFile("problem");
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusBadRequest);
+	}
+
+	testcasesZip, err := ctx.FormFile("testcases");
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusBadRequest);
+	}
+
 	testcasesSize, err := testCasesCount(testcasesZip);
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest);
 	}
 
-	// problem := models.Problem{
-	// 	ProblemID: problemID.String(),
-	// 	Name: problemMeta.Name,
-	// 	AuthorUID: author,
-	// 	TestCasesSize: ,
-	// };
+	problem := models.Problem{
+		ProblemID: problemID.String(),
+		Name: problemMeta.Name,
+		AuthorUID: author,
+		TestCasesSize: testcasesSize,
+		TimeLimit: problemMeta.TimeLimit,
+		MemoryLimit: problemMeta.MemoryLimit,
+	};
 
-	return ctx.SendStatus(200);
+	err = gorm.G[models.Problem](config.DB).Create(ctx, &problem);
+	if err != nil {
+		return ctx.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return ctx.SendStatus(fiber.StatusOK);
 }
 
-func testCasesCount(file *multipart.FileHeader) (int, error) {
+func testCasesCount(file *multipart.FileHeader) (uint8, error) {
 	src, err := file.Open();
 	if err != nil {
 		return 0, err;
@@ -62,8 +79,8 @@ func testCasesCount(file *multipart.FileHeader) (int, error) {
 		return 0, err;
 	}
 
-	inputCount := 0;
-	outputCount := 0;
+	var inputCount uint8 = 0;
+	var outputCount uint8 = 0;
 
 	for _, file := range reader.File {
 		if file.FileInfo().IsDir(){
