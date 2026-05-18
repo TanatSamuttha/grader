@@ -18,3 +18,12 @@ services:
       - ./services/problems/.env
     ports:
       - "3001:3001"
+
+  storage-server:
+    build: ./services/storage
+    env_file:
+      - ./services/storage/.env
+    ports:
+      - "3002:3002"
+    volumes:
+      - "./services/storage/safe:/safe"
