@@ -18,11 +18,11 @@ func UploadProblem(ctx fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusBadRequest);
 	}
 
-	testcaseZip, err := ctx.FormFile("testcase");
+	testcasesZip, err := ctx.FormFile("testcases");
 	if err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest);
 	}
-	if err = checkType(testcaseZip, "application/zip"); err != nil {
+	if err = checkType(testcasesZip, "application/zip"); err != nil {
 		return ctx.SendStatus(fiber.StatusBadRequest);
 	}
 
@@ -42,7 +42,7 @@ func UploadProblem(ctx fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusInternalServerError);
 	}
 
-	err = ctx.SaveFile(testcaseZip, "../safe/testcases/" + testcaseZip.Filename)
+	err = ctx.SaveFile(testcasesZip, "../safe/testcases/" + testcasesZip.Filename)
 	if err != nil {
 		fmt.Println(err);
 		return ctx.SendStatus(fiber.StatusInternalServerError);
