@@ -12,7 +12,7 @@ var DB *gorm.DB;
 
 func InitDatabase() error {
 	var dsn string = os.Getenv("DATABASE_URL");
-	var err error
+	var err error;
 	DB, err = gorm.Open(postgres.New(postgres.Config{
 		DSN: dsn,
 		PreferSimpleProtocol: true,
