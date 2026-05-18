@@ -10,6 +10,17 @@ type Problem struct {
 	MemoryLimit		uint8
 }
 
+type User struct {
+	ID			uint32 	`gorm:"primaryKey"`
+	UID 		string 	`gorm:"unique"`
+	Google_UID 	string
+	Email 		string
+	Username 	string
+	PhotoURL 	string
+	Role		string
+	Version 	uint16
+}
+
 type ProblemDTO struct {
 	Name			string	`json:"name"`
 	TimeLimit		uint8	`json:"timeLimit"`

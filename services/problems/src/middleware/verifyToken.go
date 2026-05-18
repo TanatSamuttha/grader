@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gofiber/fiber/v3"
@@ -17,14 +18,15 @@ func VerifyToken(ctx fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return ctx.SendStatus(401);
+		return ctx.SendStatus(fiber.StatusUnauthorized);
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		uid := claims["uid"].(string);
 		ctx.Locals("uid", uid);
+		fmt.Println(uid);
 		return ctx.Next();
 	}
 
-	return ctx.SendStatus(401);
+	return ctx.SendStatus(fiber.StatusUnauthorized);
 }
