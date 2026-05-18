@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"problems/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func InitDatabase() error {
 		return err;
 	}
 
-	DB.AutoMigrate(&models.User{});
+	DB.AutoMigrate(&models.Problems{});
 
 	return nil;
 }

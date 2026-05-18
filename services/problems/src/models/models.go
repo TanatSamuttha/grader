@@ -2,8 +2,8 @@ package models
 
 type Problems struct {
 	ID				uint32	`gorm:"primaryKey"`
-	FileID			string	`gorm:"unique"`
+	ProblemID		string	`gorm:"unique"`
 	TestCasesSize	uint8
-	TimeLimit		int8
-	MemoryLimit		int8
+	TimeLimit		uint8
+	MemoryLimit		uint8
 }
