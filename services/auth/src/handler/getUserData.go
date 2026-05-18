@@ -1,0 +1,24 @@
+package handler
+
+import (
+	"auth/config"
+	"auth/models"
+	"fmt"
+
+	"github.com/gofiber/fiber/v3"
+	"gorm.io/gorm"
+)
+
+func GetUserData(ctx fiber.Ctx) error {
+	uid := ctx.Locals("uid").(string)
+	user, err := gorm.G[models.User](config.DB).Where("uid = ?", uid).First(ctx)
+	userDTO := models.UserDTO{
+		Username: user.Username,
+		PhotoURL: user.PhotoURL,
+	}
+	if err != nil {
+		fmt.Println(err)
+		return ctx.SendStatus(401)
+	}
+	return ctx.JSON(userDTO)
+}

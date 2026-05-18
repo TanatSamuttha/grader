@@ -1,4 +1,4 @@
-package logic
+package middleware
 
 import (
 	"os"
