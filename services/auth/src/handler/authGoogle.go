@@ -9,16 +9,16 @@ import (
 )
 
 func AuthGoogle(ctx fiber.Ctx) error {
-	var token models.TokenDTO
+	var token models.TokenDTO;
 	if err := ctx.Bind().Body(&token); err != nil {
-		return err
+		return err;
 	}
 
-	jwt, err := logic.GoogleAuthen(ctx, token.Token)
+	jwt, err := logic.GoogleAuthen(ctx, token.Token);
 
 	if err != nil {
-		fmt.Println(err)
-		return ctx.SendStatus(401)
+		fmt.Println(err);
+		return ctx.SendStatus(fiber.StatusUnauthorized);
 	}
 
 	ctx.Cookie(&fiber.Cookie{
@@ -30,5 +30,5 @@ func AuthGoogle(ctx fiber.Ctx) error {
 		MaxAge:   60 * 60 * 24 * 3,
 	})
 
-	return ctx.SendStatus(200)
+	return ctx.SendStatus(fiber.StatusOK);
 }

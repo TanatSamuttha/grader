@@ -10,15 +10,15 @@ import (
 )
 
 func GetUserData(ctx fiber.Ctx) error {
-	uid := ctx.Locals("uid").(string)
-	user, err := gorm.G[models.User](config.DB).Where("uid = ?", uid).First(ctx)
+	uid := ctx.Locals("uid").(string);
+	user, err := gorm.G[models.User](config.DB).Where("uid = ?", uid).First(ctx);
 	userDTO := models.UserDTO{
 		Username: user.Username,
 		PhotoURL: user.PhotoURL,
-	}
+	};
 	if err != nil {
-		fmt.Println(err)
-		return ctx.SendStatus(401)
+		fmt.Println(err);
+		return ctx.SendStatus(fiber.StatusUnauthorized);
 	}
-	return ctx.JSON(userDTO)
+	return ctx.JSON(userDTO);
 }
