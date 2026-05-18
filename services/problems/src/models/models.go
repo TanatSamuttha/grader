@@ -1,6 +1,6 @@
 package models
 
-type Problems struct {
+type Problem struct {
 	ID				uint32	`gorm:"primaryKey"`
 	ProblemID		string	`gorm:"unique"`
 	Name			string

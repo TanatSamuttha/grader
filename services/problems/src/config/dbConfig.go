@@ -21,7 +21,7 @@ func InitDatabase() error {
 		return err;
 	}
 
-	DB.AutoMigrate(&models.Problems{});
+	DB.AutoMigrate(&models.Problem{});
 
 	return nil;
 }

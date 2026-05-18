@@ -1,6 +1,10 @@
 package main
 
-import "github.com/gofiber/fiber/v3"
+import (
+	"problems/handler"
+
+	"github.com/gofiber/fiber/v3"
+)
 
 func main() {
 	app := fiber.New();
@@ -10,7 +14,7 @@ func main() {
 	});
 
 	app.Post("/problems/new", func (ctx fiber.Ctx) error {
-		name := ctx.Body.
+		return handler.NewProblem(ctx);
 	});
 
 	app.Listen(":3001");
