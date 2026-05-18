@@ -11,14 +11,14 @@ type Problem struct {
 }
 
 type User struct {
-	ID			uint32 	`gorm:"primaryKey"`
-	UID 		string 	`gorm:"unique"`
-	Google_UID 	string
-	Email 		string
-	Username 	string
-	PhotoURL 	string
-	Role		string
-	Version 	uint16
+	ID				uint32 	`gorm:"primaryKey"`
+	UID 			string 	`gorm:"unique"`
+	Google_UID 		string
+	Email 			string
+	Username 		string
+	PhotoURL 		string
+	Role			string
+	Version 		uint16
 }
 
 type ProblemDTO struct {
