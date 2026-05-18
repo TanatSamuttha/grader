@@ -25,12 +25,14 @@ func main() {
 
 	app.Use("/problems/new", middleware.VerifyToken);
 
+	app.Use("/problems/new/public", middleware.CheckAdmin);
+
 	app.Get("/problems", func (ctx fiber.Ctx) error {
 		return ctx.SendString("Hello problems");
 	});
 
-	app.Post("/problems/new/all", middleware.CheckAdmin, func (ctx fiber.Ctx) error {
-		return handler.NewProblem(ctx);
+	app.Post("/problems/new/public/meta", func (ctx fiber.Ctx) error {
+		return handler.NewPublicProblem(ctx);
 	});
 
 	app.Listen(":3001");
