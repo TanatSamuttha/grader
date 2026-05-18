@@ -26,7 +26,7 @@ func main() {
 		return ctx.SendString("Hello problems");
 	});
 
-	app.Post("/problems/new", func (ctx fiber.Ctx) error {
+	app.Post("/problems/new/all", func (ctx fiber.Ctx) error {
 		return handler.NewProblem(ctx);
 	});
 
