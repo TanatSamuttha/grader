@@ -35,5 +35,9 @@ func main() {
 		return handler.NewPublicProblem(ctx);
 	});
 
+	app.Post("/problems/new/public/files", middleware.CheckSameProblem, func (ctx fiber.Ctx) error {
+		return handler.UploadPublicProblemFile(ctx);
+	});
+
 	app.Listen(":3001");
 }

@@ -10,11 +10,7 @@ import (
 	"time"
 )
 
-func SaveProblem(
-	problemPDF *multipart.FileHeader,
-	testcasesZip *multipart.FileHeader,
-) error {
-
+func SaveProblem(problemID string, problemPDF *multipart.FileHeader, testcasesZip *multipart.FileHeader) error {
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 
@@ -25,7 +21,7 @@ func SaveProblem(
 	}
 	defer pdfFile.Close()
 
-	pdfPart, err := writer.CreateFormFile("problem", problemPDF.Filename)
+	pdfPart, err := writer.CreateFormFile("problem", problemID + ".pdf")
 	if err != nil {
 		return err
 	}
@@ -41,7 +37,7 @@ func SaveProblem(
 	}
 	defer zipFile.Close()
 
-	zipPart, err := writer.CreateFormFile("testcases", testcasesZip.Filename)
+	zipPart, err := writer.CreateFormFile("testcases", problemID + ".zip")
 	if err != nil {
 		return err
 	}
@@ -57,7 +53,7 @@ func SaveProblem(
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"http://storage-server:3002/upload",
+		"http://storage-server:3002/upload/problem",
 		&body,
 	)
 	if err != nil {

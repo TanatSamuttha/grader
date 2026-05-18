@@ -21,24 +21,6 @@ func NewPublicProblem(ctx fiber.Ctx) error {
 	author := ctx.Locals("uid").(string);
 	problemID := uuid.New();
 
-	// problemPDF, err := ctx.FormFile("problem");
-	// if err != nil {
-	// 	fmt.Println(err);
-	// 	return ctx.SendStatus(fiber.StatusBadRequest);
-	// }
-
-	// testcasesZip, err := ctx.FormFile("testcases");
-	// if err != nil {
-	// 	fmt.Println(err);
-	// 	return ctx.SendStatus(fiber.StatusBadRequest);
-	// }
-
-	// testcasesSize, err := logic.TestCasesCount(testcasesZip);
-	// if err != nil {
-	// 	fmt.Println(err);
-	// 	return ctx.SendStatus(fiber.StatusBadRequest);
-	// }
-
 	problem := models.Problem{
 		ProblemID: problemID.String(),
 		Name: problemDTO.Name,
