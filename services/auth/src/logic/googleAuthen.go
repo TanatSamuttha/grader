@@ -29,7 +29,7 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			uid := uuid.New();
-			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, PhotoURL: photoURL, Version: 1};
+			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, PhotoURL: photoURL, Role: "User", Version: 1};
 			err := gorm.G[models.User](config.DB).Create(ctx, &user);
 			if err != nil {
 				return "", err;

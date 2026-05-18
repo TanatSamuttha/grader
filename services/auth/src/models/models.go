@@ -7,6 +7,7 @@ type User struct {
 	Email 		string
 	Username 	string
 	PhotoURL 	string
+	Role		string
 	Version 	uint16
 }
 
