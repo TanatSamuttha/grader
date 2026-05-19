@@ -12,6 +12,7 @@ import (
 )
 
 func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
+	// Decode TokenID
 	decodedToken, err := config.AuthClient.VerifyIDToken(
 		context.Background(),
 		token,
@@ -25,8 +26,10 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 	username := decodedToken.Claims["name"].(string);
 	photoURL := decodedToken.Claims["picture"].(string);
 
+	// Check user exist in table
 	user, err := gorm.G[models.User](config.DB).Where("email = ?", email).First(ctx);
 	if err != nil {
+		// Create new user
 		if err == gorm.ErrRecordNotFound {
 			uid := uuid.New();
 			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, PhotoURL: photoURL, Role: "User", Version: 1};
@@ -38,18 +41,20 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 			return "", err;
 		}
 	} else if user.Google_UID == ""{
+		// If user exist but never login with google
 		user.Google_UID = googleUID;
 		user.Version ++;
 		rows, err := gorm.G[models.User](config.DB).Where("uid = ? AND version = ?", user.UID, user.Version - 1).Select("google_uid", "version").Updates(ctx, user);
 		if err != nil {
-			panic(err);
+			return "", errors.New("Error add google uid to database -> " + err.Error());
 		}
 		if rows == 0 {
-			return "", errors.New("User is just updated"); 
+			return "", errors.New("Error add google uid to database -> Race condition"); 
 		}
 	}
 
-	jwtToken, err := GenerateToken(user.UID);
+	// Generate JSON web token
+	jwtToken, err := GenerateToken(user.UID, user.Role);
 	if err != nil {
 		return "", err;
 	}
