@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 	"log"
-	"problems/config"
-	"problems/models"
+	"problem/config"
+	"problem/models"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"

@@ -30,7 +30,7 @@ type ProblemDTO struct {
 
 type ProblemPreviewDTO struct {
 	ProblemID		string				`json:"problem_id"`
-	Names			[]string			`json:"name"`
+	Name			string				`json:"name"`
 }
 
 type ProblemsListDTO struct {

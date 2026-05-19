@@ -1,4 +1,4 @@
-module problems
+module problem
 
 go 1.25.0
 

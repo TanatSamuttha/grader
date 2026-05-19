@@ -12,10 +12,10 @@ services:
     ports:
       - "3000:3000"
 
-  problems-server:
-    build: ./services/problems
+  problem-server:
+    build: ./services/problem
     env_file:
-      - ./services/problems/.env
+      - ./services/problem/.env
     ports:
       - "3001:3001"
 

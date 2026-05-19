@@ -2,9 +2,9 @@ package handler
 
 import (
 	"log"
-	"problems/config"
-	"problems/logic"
-	"problems/models"
+	"problem/config"
+	"problem/logic"
+	"problem/models"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"

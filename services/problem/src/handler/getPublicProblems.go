@@ -2,8 +2,8 @@ package handler
 
 import (
 	"log"
-	"problems/config"
-	"problems/models"
+	"problem/config"
+	"problem/models"
 
 	"github.com/gofiber/fiber/v3"
 )

@@ -2,7 +2,7 @@ package config
 
 import (
 	"os"
-	"problems/models"
+	"problem/models"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
