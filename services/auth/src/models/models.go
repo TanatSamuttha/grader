@@ -11,10 +11,6 @@ type User struct {
 	Version 	uint16
 }
 
-type TokenDTO struct {
-	Token 		string	`json:"token"`
-}
-
 type UserDTO struct {
 	Username 	string	`json:"username"`
 	PhotoURL 	string	`json:"photoURL"`

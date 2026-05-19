@@ -18,8 +18,12 @@ export async function googleSignIn(setLoggedIn, setUsername, setPhoto) {
     const user = result.user;
     const token = await user.getIdToken();
     console.log(user);
-    const response = await axios.post("/auth/google", {
-            token: token
+    const response = await axios.post("/auth/google", 
+        {},
+        {
+            headers: {
+                token: token
+            }
         }
     );
     await getUserData(setLoggedIn, setUsername, setPhoto);
