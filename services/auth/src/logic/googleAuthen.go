@@ -18,7 +18,7 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 		token,
 	)
 	if err != nil {
-		return "", err;
+		return "", errors.New("Error verify token -> " + err.Error());
 	}
 
 	googleUID := decodedToken.UID;
@@ -35,10 +35,10 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 			user = models.User{UID: uid.String(), Google_UID: googleUID, Email: email, Username: username, PhotoURL: photoURL, Role: "User", Version: 1};
 			err := gorm.G[models.User](config.DB).Create(ctx, &user);
 			if err != nil {
-				return "", err;
+				return "", errors.New("Error create new user to database -> " + err.Error());
 			}
 		} else {
-			return "", err;
+			return "", errors.New("Error query user in database -> " + err.Error());
 		}
 	} else if user.Google_UID == ""{
 		// If user exist but never login with google
@@ -56,7 +56,7 @@ func GoogleAuthen(ctx fiber.Ctx, token string) (string, error) {
 	// Generate JSON web token
 	jwtToken, err := GenerateToken(user.UID, user.Role);
 	if err != nil {
-		return "", err;
+		return "", errors.New("Error generate JWT -> " + err.Error());
 	}
 
 	return jwtToken, nil;

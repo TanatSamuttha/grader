@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"errors"
 	"os"
 
 	firebase "firebase.google.com/go/v4"
@@ -18,12 +19,12 @@ func InitFirebase() error {
 	ctx := context.Background();
 	app, err := firebase.NewApp(ctx, nil, opt);
 	if err != nil {
-		return err;
+		return errors.New("Error firebase new app -> " + err.Error());
 	}
 
 	AuthClient, err = app.Auth(ctx);
 	if err != nil {
-		return err;
+		return errors.New("Error auth firebase client -> " + err.Error());
 	}
 
 	return nil;

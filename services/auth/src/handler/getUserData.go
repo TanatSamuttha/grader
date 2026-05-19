@@ -3,7 +3,7 @@ package handler
 import (
 	"auth/config"
 	"auth/models"
-	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
@@ -17,7 +17,7 @@ func GetUserData(ctx fiber.Ctx) error {
 		PhotoURL: user.PhotoURL,
 	};
 	if err != nil {
-		fmt.Println(err);
+		log.Println("Error query user from database -> " + err.Error());
 		return ctx.SendStatus(fiber.StatusUnauthorized);
 	}
 	return ctx.JSON(userDTO);

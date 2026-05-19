@@ -2,6 +2,7 @@ package config
 
 import (
 	"auth/models"
+	"errors"
 	"os"
 
 	"gorm.io/driver/postgres"
@@ -18,7 +19,7 @@ func InitDatabase() error {
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{});
 	if err != nil {
-		return err;
+		return errors.New("Error connect to data base -> " + err.Error());
 	}
 
 	DB.AutoMigrate(&models.User{});

@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"errors"
 	"os"
 	"time"
 
@@ -24,7 +25,7 @@ func GenerateToken(uid string, role string) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(secret));
 	if err != nil {
-		return "", err;
+		return "", errors.New("Error get token string -> " + err.Error());
 	}
 
 	return  tokenString, nil;
