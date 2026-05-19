@@ -11,7 +11,7 @@ import (
 func TestCasesCount(file *multipart.FileHeader) (uint8, error) {
 	src, err := file.Open()
 	if err != nil {
-		return 0, err
+		return 0, errors.New("Error open file -> " + err.Error());
 	}
 	defer src.Close()
 
@@ -19,7 +19,7 @@ func TestCasesCount(file *multipart.FileHeader) (uint8, error) {
 
 	_, err = src.Read(data)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("Error read src -> " + err.Error());
 	}
 
 	reader, err := zip.NewReader(
@@ -27,7 +27,7 @@ func TestCasesCount(file *multipart.FileHeader) (uint8, error) {
 		file.Size,
 	)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("Error create reader -> " + err.Error());
 	}
 
 	var inputCount uint8 = 0
@@ -48,7 +48,7 @@ func TestCasesCount(file *multipart.FileHeader) (uint8, error) {
 	}
 
 	if inputCount != outputCount {
-		return 0, errors.New("input/output mismatch")
+		return 0, errors.New("Error testcases count -> input/output mismatch");
 	}
 
 	return inputCount, nil

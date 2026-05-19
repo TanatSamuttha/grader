@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"fmt"
+	"errors"
+	"log"
 	"problems/config"
 	"problems/models"
 
@@ -13,10 +14,9 @@ import (
 func NewPublicProblem(ctx fiber.Ctx) error {
 	var problemDTO models.ProblemDTO;
 	if err := ctx.Bind().Body(&problemDTO); err != nil {
-		fmt.Println(err);
+		log.Println(errors.New("Error get problem from body -> " + err.Error()));
 		return ctx.SendStatus(fiber.StatusBadRequest);
 	}
-	fmt.Println(problemDTO);
 
 	author := ctx.Locals("uid").(string);
 	problemID := uuid.New();
@@ -30,7 +30,7 @@ func NewPublicProblem(ctx fiber.Ctx) error {
 	};
 
 	if err := gorm.G[models.Problem](config.DB).Create(ctx, &problem); err != nil {
-		fmt.Println(err);
+		log.Println(errors.New("Error create new problem mata data in database -> " + err.Error()));
 		return ctx.SendStatus(fiber.StatusInternalServerError);
 	}
 

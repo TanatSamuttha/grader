@@ -19,12 +19,12 @@ func main(){
 
 	err = config.InitDatabase();
 	if err != nil {
-		panic(err);
+		panic("Error init database -> " + err.Error());
 	}
 
 	err = config.InitFirebase();
 	if err != nil {
-		panic(err);
+		panic("Error init firebase -> " + err.Error());
 	}
 
 	app := fiber.New();

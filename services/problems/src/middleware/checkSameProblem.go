@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	"log"
 	"problems/config"
 	"problems/models"
 
@@ -14,7 +14,7 @@ func CheckSameProblem(ctx fiber.Ctx) error {
 	problemID := ctx.Cookies("CreatingProblemID");
 	_, err := gorm.G[models.Problem](config.DB).Select("problem_id").Where("problem_id = ? AND author_uid = ?", problemID, uid).First(ctx);
 	if err != nil {
-		fmt.Println("Error check same problem -> " + err.Error());
+		log.Println("Error check same problem -> " + err.Error());
 		return ctx.SendStatus(fiber.StatusUnauthorized);
 	}
 	return ctx.Next();

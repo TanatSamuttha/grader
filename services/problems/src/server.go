@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"problems/config"
 	"problems/handler"
 	"problems/middleware"
@@ -13,12 +13,12 @@ import (
 func main() {
 	err := godotenv.Load("../.env");
 	if err != nil {
-		fmt.Println(err);
+		log.Println("Error load env -> " + err.Error());
 	}
 
 	err = config.InitDatabase();
 	if err != nil {
-		panic(err);
+		panic("Error init database -> " + err.Error());
 	}
 
 	app := fiber.New();
