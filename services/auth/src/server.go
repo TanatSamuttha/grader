@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/joho/godotenv"
@@ -14,7 +14,7 @@ import (
 func main(){
 	err := godotenv.Load("../.env");
 	if err != nil {
-		fmt.Println(err);
+		log.Println("Error load env -> " + err.Error());
 	}
 
 	err = config.InitDatabase();
