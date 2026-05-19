@@ -39,5 +39,9 @@ func main() {
 		return handler.UploadPublicProblemFile(ctx);
 	});
 
+	app.Get("/problems/public", func (ctx fiber.Ctx) error {
+		return handler.GetPublicProblems(ctx);
+	});
+
 	app.Listen(":3001");
 }

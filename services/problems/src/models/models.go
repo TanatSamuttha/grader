@@ -1,18 +1,19 @@
 package models
 
 type Problem struct {
-	ID				uint32	`gorm:"primaryKey"`
-	ProblemID		string	`gorm:"unique"`
+	ID				uint32				`gorm:"primaryKey"`
+	ProblemID		string				`gorm:"unique"`
 	Name			string
 	AuthorUID		string
 	TestCasesSize	uint8
 	TimeLimit		uint8
 	MemoryLimit		uint8
+	Visibility		string
 }
 
 type User struct {
-	ID				uint32 	`gorm:"primaryKey"`
-	UID 			string 	`gorm:"unique"`
+	ID				uint32 				`gorm:"primaryKey"`
+	UID 			string 				`gorm:"unique"`
 	Google_UID 		string
 	Email 			string
 	Username 		string
@@ -22,7 +23,16 @@ type User struct {
 }
 
 type ProblemDTO struct {
-	Name			string	`json:"name"`
-	TimeLimit		uint8	`json:"timeLimit"`
-	MemoryLimit		uint8	`json:"memoryLimit"`
+	Name			string				`json:"name"`
+	TimeLimit		uint8				`json:"timeLimit"`
+	MemoryLimit		uint8				`json:"memoryLimit"`
+}
+
+type ProblemPreviewDTO struct {
+	ProblemID		string				`json:"problem_id"`
+	Names			[]string			`json:"name"`
+}
+
+type ProblemsListDTO struct {
+	Problems		[]ProblemPreviewDTO	`json:"problems"`
 }
