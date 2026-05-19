@@ -23,8 +23,10 @@ func VerifyToken(ctx fiber.Ctx) error {
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		uid := claims["uid"].(string);
+		role := claims["role"].(string);
 		ctx.Locals("uid", uid);
-		fmt.Println(uid);
+		ctx.Locals("role", role);
+		fmt.Println("Problem service verify user -> " + uid + " : " + role);
 		return ctx.Next();
 	}
 
