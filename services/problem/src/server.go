@@ -43,5 +43,9 @@ func main() {
 		return handler.GetPublicProblems(ctx);
 	});
 
+	app.Get("/problem/pdf", func (ctx fiber.Ctx) error {
+		return handler.GetProblemPDF(ctx);
+	});
+
 	app.Listen(":3001");
 }
