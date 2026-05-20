@@ -5,7 +5,7 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import Profile from './components/Profile'
 import NavigatorBar from './components/NavigatorBar'
-import Content from './components/Content'
+import PublicContent from './components/PublicContent'
 
 function App() {
     const [content, setContent] = useState("Problems");
@@ -18,7 +18,7 @@ function App() {
             </header>
             <main>
                 <NavigatorBar setContent = {setContent} />
-                <Content content = {content} />
+                <PublicContent content = {content} />
             </main>
         </>
     )

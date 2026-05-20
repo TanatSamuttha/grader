@@ -27,6 +27,7 @@ func NewPublicProblem(ctx fiber.Ctx) error {
 		AuthorUID: author,
 		TimeLimit: problemDTO.TimeLimit,
 		MemoryLimit: problemDTO.MemoryLimit,
+		Visibility: "public",
 	};
 
 	if err := gorm.G[models.Problem](config.DB).Create(ctx, &problem); err != nil {

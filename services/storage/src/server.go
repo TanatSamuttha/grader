@@ -17,10 +17,14 @@ func main() {
 
 	app := fiber.New();
 
-	app.Use("/upload", middleware.VerifyKey);
+	app.Use("/storage", middleware.VerifyKey);
 
-	app.Post("/upload/problem", func (ctx fiber.Ctx) error {
+	app.Post("/storage/upload/problem", func (ctx fiber.Ctx) error {
 		return handler.UploadProblem(ctx);
+	});
+
+	app.Get("/storage/get/problem", func (ctx fiber.Ctx) error {
+		return handler.GetProblem(ctx);
 	});
 
 	app.Listen(":3002");
