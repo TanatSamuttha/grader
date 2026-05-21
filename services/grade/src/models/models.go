@@ -27,4 +27,10 @@ type Job struct {
 	UID				string
 	ProblemID		string
 	Code			string
+	Lang			string
+}
+
+type CodeDTO struct {
+	Code			string				`json:"code"`
+	Lang			string				`json:"lang"`
 }
