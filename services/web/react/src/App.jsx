@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+
 import './App.css'
+
 import Profile from './components/Profile'
 import NavigatorBar from './components/NavigatorBar'
-import PublicContent from './components/PublicContent'
+import LobbyContent from './components/LobbyContent'
+
+const useStore = create((set) => ({
+    main: (
+        <NavigatorBar setContent={setContent} />,
+        <LobbyContent content={content} setMain = {setMain} />
+    ),
+    setMain: (main) => set({main})
+}));
 
 function App() {
-    const [content, setContent] = useState("Problems");
-
+    const [content]
     return (
         <>
             <header>
@@ -17,11 +23,12 @@ function App() {
                 <Profile />
             </header>
             <main>
-                <NavigatorBar setContent = {setContent} />
-                <PublicContent content = {content} />
+                {main}
             </main>
         </>
-    )
+    );
+
+    return null;
 }
 
-export default App
+export default App;
