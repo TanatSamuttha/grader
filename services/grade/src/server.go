@@ -21,6 +21,13 @@ func main() {
 		panic("Error init database -> " + err.Error());
 	}
 
+	err = config.InitDockerClient();
+	if err != nil {
+		panic("Error init docker client -> " + err.Error());
+	}
+
+	log.Println(config.DockerClient);
+
 	config.SummonWorkers(2);
 
 	app := fiber.New();

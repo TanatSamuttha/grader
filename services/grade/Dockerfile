@@ -9,11 +9,11 @@ COPY ./src .
 RUN go build -o server .
 
 FROM debian:stable-slim
-RUN apt-get update && apt-get install -y ca-certificates
+RUN apt-get update && apt-get install -y ca-certificates docker.io
 WORKDIR /app
 
 COPY --from=builder /app/server .
 
-EXPOSE 3001
+EXPOSE 3003
 
 CMD [ "./server" ]
