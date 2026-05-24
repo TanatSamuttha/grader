@@ -3,6 +3,7 @@ package handler
 import (
 	"grade/config"
 	"grade/models"
+	"log"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
@@ -10,7 +11,7 @@ import (
 
 func SubmissionHandler(ctx fiber.Ctx) error {
 	id := uuid.New().String();
-	uid := ctx.Get("uid");
+	uid := ctx.Locals("uid").(string);
 	problemID := ctx.Get("problem_id");
 
 	var codeDTO models.CodeDTO;
@@ -29,6 +30,7 @@ func SubmissionHandler(ctx fiber.Ctx) error {
 		Code: code,
 		Lang: lang,
 	};
+	log.Println(job);
 
 	config.CallWorker(job);
 

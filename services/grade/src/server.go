@@ -34,5 +34,5 @@ func main() {
 
 	app.Post("/grade", middleware.VerifyToken, handler.SubmissionHandler);
 
-	app.Listen(":3001");
+	app.Listen(":3004");
 }

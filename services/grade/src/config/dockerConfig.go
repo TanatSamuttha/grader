@@ -1,6 +1,12 @@
 package config
 
-import "github.com/docker/docker/client"
+import (
+	"context"
+	"io"
+
+	"github.com/docker/docker/api/types/image"
+	"github.com/docker/docker/client"
+)
 
 var DockerClient *client.Client;
 
@@ -10,5 +16,15 @@ func InitDockerClient() error {
 		client.FromEnv,
 		client.WithAPIVersionNegotiation(),
 	)
-	return err;
+	if err != nil {
+		return err;
+	}
+	ctx := context.Background();
+	reader, err := DockerClient.ImagePull(ctx, "gcc:latest", image.PullOptions{})
+	if err != nil {
+		return err;
+	}
+	io.Copy(io.Discard, reader)
+	reader.Close()
+	return nil;
 }

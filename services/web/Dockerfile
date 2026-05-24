@@ -2,10 +2,10 @@ FROM node:20 AS builder
 
 WORKDIR /app
 
-COPY ./react/package*.json ./
+COPY ./react_backup/package*.json ./
 RUN npm install
 
-COPY ./react ./
+COPY ./react_backup ./
 
 RUN npm run build
 
