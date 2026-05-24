@@ -25,7 +25,7 @@ func CallWorker(job models.Job) {
 func worker(jobs <-chan models.Job) {
 	ctx := context.Background();
 	for job := range jobs {
-		container, err := DockerClient.ContainerCreate(
+		resp, err := DockerClient.ContainerCreate(
 			ctx,
 			&container.Config{
 				Image: "docker.io/library/gcc:latest",
@@ -39,7 +39,16 @@ func worker(jobs <-chan models.Job) {
 		if err != nil {
 			log.Println("Error create container -> " + err.Error());
 		}
-		log.Println("Created new container -> " + container.ID);
-		logic.Grade(job, &container);
+
+		log.Println("Created new container -> " + resp.ID);
+		logic.Grade(job, &resp);
+
+		DockerClient.ContainerRemove(
+			ctx,
+			resp.ID,
+			container.RemoveOptions{
+				Force: true,
+			},
+		);
 	}
 }
