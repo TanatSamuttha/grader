@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"grade/config"
+	"grade/logic"
 	"grade/models"
 	"log"
 
@@ -32,7 +32,7 @@ func SubmissionHandler(ctx fiber.Ctx) error {
 	};
 	log.Println(job);
 
-	config.CallWorker(job);
+	logic.CallWorker(job);
 
 	return ctx.SendStatus(fiber.StatusOK);
 }

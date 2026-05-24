@@ -3,6 +3,7 @@ package main
 import (
 	"grade/config"
 	"grade/handler"
+	"grade/logic"
 	"grade/middleware"
 	"log"
 
@@ -28,7 +29,7 @@ func main() {
 
 	log.Println(config.DockerClient);
 
-	config.SummonWorkers(2);
+	logic.SummonWorkers(2);
 
 	app := fiber.New();
 
