@@ -19,13 +19,11 @@ func main() {
 
 	app.Use("/storage", middleware.VerifyKey);
 
-	app.Post("/storage/upload/problem", func (ctx fiber.Ctx) error {
-		return handler.UploadProblem(ctx);
-	});
+	app.Post("/storage/upload/problem", handler.UploadProblem);
 
-	app.Get("/storage/get/problem", func (ctx fiber.Ctx) error {
-		return handler.GetProblem(ctx);
-	});
+	app.Get("/storage/get/problem", handler.GetProblem);
+
+	app.Get("/storage/get/testcases", handler.GetTestcases);
 
 	app.Listen(":3002");
 }
