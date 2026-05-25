@@ -20,6 +20,10 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 	compileOutput, err := Compile(resp, ctx);
 	log.Println(compileOutput);
 
+	input, output, err := GetTestcases(job.ProblemID);
+	log.Println(input);
+	log.Println(output);
+
 	execOutput, err := Execute(resp, ctx);
 	log.Println(execOutput);
 
