@@ -36,6 +36,9 @@ func Compile(resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer
 		execResp.ID,
 		types.ExecStartCheck{},
 	);
+	if err != nil {
+		return nil, errors.New("Error attach execute -> " + err.Error());
+	}
 
 	defer attachResp.Close();
 
