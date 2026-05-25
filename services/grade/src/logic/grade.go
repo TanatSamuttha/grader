@@ -17,8 +17,11 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 		return errors.New("Error copy code -> " + err.Error());
 	}
 
-	output, err := Compile(resp, ctx);
-	log.Println(output);
+	compileOutput, err := Compile(resp, ctx);
+	log.Println(compileOutput);
+
+	execOutput, err := Execute(resp, ctx);
+	log.Println(execOutput);
 
 	return nil;
 }

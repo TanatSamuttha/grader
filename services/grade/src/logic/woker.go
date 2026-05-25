@@ -32,7 +32,7 @@ func worker(jobs <-chan models.Job) {
 				WorkingDir: "/workspace",
 				Cmd: []string{
 					"sleep",
-					"60",
+					"infinity",
 				},
 				Tty: false,
 			},
@@ -43,32 +43,54 @@ func worker(jobs <-chan models.Job) {
 		);
 		if err != nil {
 			log.Println("Error create container -> " + err.Error());
+			config.DockerClient.ContainerRemove(
+				ctx,
+				resp.ID,
+				container.RemoveOptions{
+					Force: true,
+				},
+			);
+			continue;
 		}
 
 		err = config.DockerClient.ContainerStart(
 			ctx,
 			resp.ID,
 			container.StartOptions{},
-		)
+		);
 
 		if err != nil {
-			log.Println("Error start container -> " + err.Error())
-			continue
+			log.Println("Error start container -> " + err.Error());
+			config.DockerClient.ContainerRemove(
+				ctx,
+				resp.ID,
+				container.RemoveOptions{
+					Force: true,
+				},
+			);
+			continue;
 		}
 		log.Println("Created new container -> " + resp.ID);
 
 		err = Grade(job, &resp, ctx);
 		if err != nil {
-			log.Println("Error grade -> " + err.Error())
-			continue
+			log.Println("Error grade -> " + err.Error());
+			config.DockerClient.ContainerRemove(
+				ctx,
+				resp.ID,
+				container.RemoveOptions{
+					Force: true,
+				},
+			);
+			continue;
 		}
 
-		// config.DockerClient.ContainerRemove(
-		// 	ctx,
-		// 	resp.ID,
-		// 	container.RemoveOptions{
-		// 		Force: true,
-		// 	},
-		// );
+		config.DockerClient.ContainerRemove(
+			ctx,
+			resp.ID,
+			container.RemoveOptions{
+				Force: true,
+			},
+		);
 	}
 }
