@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -20,7 +21,8 @@ func GetTestcases(problemID string) ([]string, []string, error) {
 		return nil, nil, errors.New("Error create http request -> " + err.Error());
 	}
 
-	req.Header.Set("problem_id", problemID)
+	req.Header.Set("Storage-Key", os.Getenv("STORAGE_KEY"));
+	req.Header.Set("problem_id", problemID);
 
 	client := &http.Client{}
 

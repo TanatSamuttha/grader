@@ -23,9 +23,15 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 	input, output, err := GetTestcases(job.ProblemID);
 	log.Println(input);
 	log.Println(output);
+	if err != nil {
+		return errors.New("Error get test cases -> " + err.Error());
+	}
 
 	execOutput, err := Execute(resp, ctx);
 	log.Println(execOutput);
+	if err != nil {
+		return errors.New("Error execute -> " + err.Error());
+	}
 
 	return nil;
 }
