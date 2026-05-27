@@ -1,5 +1,11 @@
 package logic
 
-import "github.com/gofiber/contrib/websocket"
+import (
+	"sync"
+
+	"github.com/gofiber/contrib/websocket"
+)
 
 var SocketMap map[string]*websocket.Conn;
+
+var SocketMutex sync.RWMutex

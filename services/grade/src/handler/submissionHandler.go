@@ -34,5 +34,14 @@ func SubmissionHandler(ctx fiber.Ctx) error {
 
 	logic.CallWorker(job);
 
+	ctx.Cookie(&fiber.Cookie{
+		Name:     "job_id",
+		Value:    job.ID,
+		HTTPOnly: true,
+		Secure:   false,
+		SameSite: "Lax",
+		MaxAge:   60 * 2,
+	});
+
 	return ctx.SendStatus(fiber.StatusOK);
 }

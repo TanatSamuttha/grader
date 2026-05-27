@@ -8,5 +8,7 @@ import (
 
 func ReturnResult(conn *websocket.Conn) {
 	jobID := conn.Cookies("job_id");
+	logic.SocketMutex.Lock();
 	logic.SocketMap[jobID] = conn;
+	logic.SocketMutex.Unlock();
 }
