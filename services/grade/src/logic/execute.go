@@ -5,44 +5,59 @@ import (
 	"context"
 	"errors"
 	"grade/config"
-	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
-func Execute(resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer, error) {
+func Execute(input *string, resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer, error) {
 	execResp, err := config.DockerClient.ContainerExecCreate(
 		ctx,
-		(*resp).ID,
+		resp.ID,
 		types.ExecConfig{
 			Cmd: []string{
 				"/workspace/main",
 			},
-			AttachStdin: true,
+			AttachStdin:  true,
 			AttachStdout: true,
 			AttachStderr: true,
 		},
-	);
+	)
 	if err != nil {
-		return nil, errors.New("Error create execute -> " + err.Error());
+		return nil, errors.New("Error create execute -> " + err.Error())
 	}
 
 	attachResp, err := config.DockerClient.ContainerExecAttach(
 		ctx,
 		execResp.ID,
 		types.ExecStartCheck{},
-	);
+	)
 	if err != nil {
-		return nil, errors.New("Error attach execute -> " + err.Error());
+		return nil, errors.New("Error attach execute -> " + err.Error())
 	}
 
-	defer attachResp.Close();
+	defer attachResp.Close()
 
-	attachResp.Conn.Write([]byte("5 7\n"));
+	_, err = attachResp.Conn.Write([]byte(*input))
+	if err != nil {
+		return nil, errors.New("Error write stdin -> " + err.Error())
+	}
 
-	output := new(bytes.Buffer);
-	io.Copy(output, attachResp.Reader);
+	// Important: close stdin so program receives EOF
+	attachResp.CloseWrite()
 
-	return output, nil;
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+
+	_, err = stdcopy.StdCopy(stdout, stderr, attachResp.Reader)
+	if err != nil {
+		return nil, errors.New("Error read stdout -> " + err.Error())
+	}
+
+	if stderr.Len() > 0 {
+		return nil, errors.New(stderr.String())
+	}
+
+	return stdout, nil
 }
