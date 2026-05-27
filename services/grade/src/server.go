@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/contrib/websocket"
 	"github.com/joho/godotenv"
 )
 
@@ -33,7 +34,11 @@ func main() {
 
 	app := fiber.New();
 
-	app.Post("/grade", middleware.VerifyToken, handler.SubmissionHandler);
+	app.Use("/grade", middleware.VerifyToken);
+
+	app.Post("/grade/submit", handler.SubmissionHandler);
+
+	app.Get("/grade/result", websocket.New(handler.ReturnResult));
 
 	app.Listen(":3004");
 }
