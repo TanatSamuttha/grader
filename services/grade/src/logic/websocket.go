@@ -5,6 +5,7 @@ import (
 	"grade/models"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/gofiber/contrib/websocket"
 )
@@ -19,9 +20,19 @@ func SendResult(GradeResBuffer <- chan models.GradeResDTO) {
 	for res := range GradeResBuffer {
 		jobID := res.JobID;
 
-		SocketMutex.Lock();
-		conn := SocketMap[jobID];
-		SocketMutex.Unlock();
+		var conn *websocket.Conn
+
+		for {
+			SocketMutex.RLock()
+			conn = SocketMap[jobID]
+			SocketMutex.RUnlock()
+
+			if conn != nil {
+				break
+			}
+
+			time.Sleep(200 * time.Millisecond);
+		}
 
 		res.JobID = "";
 
