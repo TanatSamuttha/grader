@@ -92,5 +92,12 @@ func worker(jobs <-chan models.Job) {
 				Force: true,
 			},
 		);
+
+		SocketMutex.Lock();
+		conn := SocketMap[job.ID];
+		delete(SocketMap, job.ID);
+		SocketMutex.Unlock();
+
+		conn.Close();
 	}
 }
