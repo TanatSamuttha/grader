@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 )
 
-func Execute(input *string, resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer, error) {
+func Execute(input *string, resp *container.CreateResponse, ctx context.Context) (string, string, error) {
 	execResp, err := config.DockerClient.ContainerExecCreate(
 		ctx,
 		resp.ID,
@@ -25,7 +25,7 @@ func Execute(input *string, resp *container.CreateResponse, ctx context.Context)
 		},
 	)
 	if err != nil {
-		return nil, errors.New("Error create execute -> " + err.Error())
+		return "", "", errors.New("Error create execute -> " + err.Error())
 	}
 
 	attachResp, err := config.DockerClient.ContainerExecAttach(
@@ -34,14 +34,14 @@ func Execute(input *string, resp *container.CreateResponse, ctx context.Context)
 		types.ExecStartCheck{},
 	)
 	if err != nil {
-		return nil, errors.New("Error attach execute -> " + err.Error())
+		return "", "", errors.New("Error attach execute -> " + err.Error())
 	}
 
 	defer attachResp.Close()
 
 	_, err = attachResp.Conn.Write([]byte(*input))
 	if err != nil {
-		return nil, errors.New("Error write stdin -> " + err.Error())
+		return "", "", errors.New("Error write stdin -> " + err.Error())
 	}
 
 	// Important: close stdin so program receives EOF
@@ -52,12 +52,12 @@ func Execute(input *string, resp *container.CreateResponse, ctx context.Context)
 
 	_, err = stdcopy.StdCopy(stdout, stderr, attachResp.Reader)
 	if err != nil {
-		return nil, errors.New("Error read stdout -> " + err.Error())
+		return "", "", errors.New("Error read stdout -> " + err.Error())
 	}
 
 	if stderr.Len() > 0 {
-		return nil, errors.New(stderr.String())
+		return "", stderr.String(), nil;
 	}
 
-	return stdout, nil
+	return stdout.String(), "", nil;
 }

@@ -18,8 +18,14 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 		return errors.New("Error copy code -> " + err.Error());
 	}
 
-	compileOutput, err := Compile(resp, ctx);
+	compileOutput, compileError, err := Compile(resp, ctx);
 	log.Println(compileOutput);
+	if err != nil {
+		return errors.New("Error compile -> " + err.Error());
+	}
+	if len(compileError) > 0 {
+		return errors.New("Compile error: -> " + compileError);
+	}
 
 	inputs, outputs, err := GetTestcases(job.ProblemID);
 	log.Println(inputs);
@@ -36,23 +42,21 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 		output := outputs[i];
 
 		
-		execOutput, err := Execute(&input, resp, ctx);
+		execOutput, execErr,  err := Execute(&input, resp, ctx);
 		if err != nil {
 			return errors.New("Error execute -> " + err.Error());
 		}
-
-		execString := execOutput.String();
-		
-		output = strings.ReplaceAll(output, "\r\n", "\n");
-		execString = strings.ReplaceAll(execString, "\r\n", "\n");
+		if len(execErr) > 0 {
+			log.Println("Execution error: " + execErr);
+		}
 		
 		output = strings.TrimRight(output, " \t\r\n");
-		execString = strings.TrimRight(execString, " \t\r\n");
+		execOutput = strings.TrimRight(execOutput, " \t\r\n");
 		log.Printf("input      -> %q", input);
 		log.Printf("output     -> %q", output);
-		log.Printf("execOutput -> %q", execString);
+		log.Printf("execOutput -> %q", execOutput);
 
-		if output == execString {
+		if output == execOutput {
 			log.Println("correct");
 		} else {
 			log.Println("wrong");

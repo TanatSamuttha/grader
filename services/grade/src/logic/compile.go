@@ -5,13 +5,13 @@ import (
 	"context"
 	"errors"
 	"grade/config"
-	"io"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
-func Compile(resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer, error) {
+func Compile(resp *container.CreateResponse, ctx context.Context) (string, string, error) {
 	execResp, err := config.DockerClient.ContainerExecCreate(
 		ctx,
 		(*resp).ID,
@@ -28,7 +28,7 @@ func Compile(resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer
 		},
 	);
 	if err != nil {
-		return nil, errors.New("Error create execute -> " + err.Error());
+		return "", "", errors.New("Error create execute -> " + err.Error());
 	}
 
 	attachResp, err := config.DockerClient.ContainerExecAttach(
@@ -37,13 +37,21 @@ func Compile(resp *container.CreateResponse, ctx context.Context) (*bytes.Buffer
 		types.ExecStartCheck{},
 	);
 	if err != nil {
-		return nil, errors.New("Error attach execute -> " + err.Error());
+		return "", "", errors.New("Error attach execute -> " + err.Error());
 	}
 
 	defer attachResp.Close();
+	stdout := new(bytes.Buffer);
+	stderr := new(bytes.Buffer);
 
-	output := new(bytes.Buffer)
-	io.Copy(output, attachResp.Reader);
+	_, err = stdcopy.StdCopy(stdout, stderr, attachResp.Reader)
+	if err != nil {
+		return "", "", errors.New("Error read compile stdout -> " + err.Error())
+	}
 
-	return output, nil;
+	if stderr.Len() > 0 {
+		return "", stderr.String(), nil;
+	}
+
+	return stdout.String(), "", nil;
 }
