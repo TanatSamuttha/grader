@@ -34,19 +34,22 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 		return errors.New("Error get test cases -> " + err.Error());
 	}
 
+	gradeRes := make([]bool, len(inputs));
+	score := 0;
+
 	for i, input:= range inputs {
 		if input[len(input) - 1] != '\n' {
 			input += "\n";
 		}
 
 		output := outputs[i];
-
 		
 		execOutput, execErr,  err := Execute(&input, resp, ctx);
 		if err != nil {
 			return errors.New("Error execute -> " + err.Error());
 		}
 		if len(execErr) > 0 {
+			gradeRes[i] = false;
 			log.Println("Execution error: " + execErr);
 		}
 		
@@ -57,8 +60,11 @@ func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) 
 		log.Printf("execOutput -> %q", execOutput);
 
 		if output == execOutput {
+			gradeRes[i] = true;
+			score++;
 			log.Println("correct");
 		} else {
+			gradeRes[i] = false;
 			log.Println("wrong");
 		}
 	}
