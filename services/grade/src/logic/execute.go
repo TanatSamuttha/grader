@@ -6,16 +6,15 @@ import (
 	"errors"
 	"grade/config"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	"github.com/moby/moby/client"
 )
 
-func Execute(input *string, resp *container.CreateResponse, ctx context.Context) (string, string, error) {
-	execResp, err := config.DockerClient.ContainerExecCreate(
+func Execute(input *string, resp *client.ContainerCreateResult, ctx context.Context) (string, string, error) {
+	execResp, err := config.DockerClient.ExecCreate(
 		ctx,
 		resp.ID,
-		types.ExecConfig{
+		client.ExecCreateOptions{
 			Cmd: []string{
 				"/workspace/main",
 			},
@@ -28,10 +27,10 @@ func Execute(input *string, resp *container.CreateResponse, ctx context.Context)
 		return "", "", errors.New("Error create execute -> " + err.Error())
 	}
 
-	attachResp, err := config.DockerClient.ContainerExecAttach(
+	attachResp, err := config.DockerClient.ExecAttach(
 		ctx,
 		execResp.ID,
-		types.ExecStartCheck{},
+		client.ExecAttachOptions{},
 	)
 	if err != nil {
 		return "", "", errors.New("Error attach execute -> " + err.Error())

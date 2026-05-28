@@ -6,7 +6,8 @@ import (
 	"grade/models"
 	"log"
 
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/client"
 )
 
 var jobs chan models.Job;
@@ -27,36 +28,34 @@ func worker(jobs <-chan models.Job) {
 	for job := range jobs {
 		resp, err := config.DockerClient.ContainerCreate(
 			ctx,
-			&container.Config{
-				Image: "docker.io/library/gcc:latest",
-				WorkingDir: "/workspace",
-				Cmd: []string{
-					"sleep",
-					"infinity",
-				},
-				Tty: false,
+			client.ContainerCreateOptions{
+				Config: &container.Config{
+					Image: "docker.io/library/gcc:latest",
+					WorkingDir: "/workspace",
+					Cmd: []string{
+						"sleep",
+						"infinity",
+					},
+					Tty: false,
+				},	
 			},
-			nil,
-			nil,
-			nil,
-			"",
 		);
 		if err != nil {
 			log.Println("Error create container -> " + err.Error());
 			config.DockerClient.ContainerRemove(
 				ctx,
 				resp.ID,
-				container.RemoveOptions{
+				client.ContainerRemoveOptions{
 					Force: true,
 				},
 			);
 			continue;
 		}
 
-		err = config.DockerClient.ContainerStart(
+		_, err = config.DockerClient.ContainerStart(
 			ctx,
 			resp.ID,
-			container.StartOptions{},
+			client.ContainerStartOptions{},
 		);
 
 		if err != nil {
@@ -64,7 +63,7 @@ func worker(jobs <-chan models.Job) {
 			config.DockerClient.ContainerRemove(
 				ctx,
 				resp.ID,
-				container.RemoveOptions{
+				client.ContainerRemoveOptions{
 					Force: true,
 				},
 			);
@@ -78,7 +77,7 @@ func worker(jobs <-chan models.Job) {
 			config.DockerClient.ContainerRemove(
 				ctx,
 				resp.ID,
-				container.RemoveOptions{
+				client.ContainerRemoveOptions{
 					Force: true,
 				},
 			);
@@ -88,7 +87,7 @@ func worker(jobs <-chan models.Job) {
 		config.DockerClient.ContainerRemove(
 			ctx,
 			resp.ID,
-			container.RemoveOptions{
+			client.ContainerRemoveOptions{
 				Force: true,
 			},
 		);

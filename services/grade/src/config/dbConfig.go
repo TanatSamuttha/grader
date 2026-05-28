@@ -1,8 +1,8 @@
 package config
 
 import (
-	"os"
 	"grade/models"
+	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

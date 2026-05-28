@@ -4,8 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/docker/docker/api/types/image"
-	"github.com/docker/docker/client"
+	"github.com/moby/moby/client"
 )
 
 var DockerClient *client.Client;
@@ -20,7 +19,7 @@ func InitDockerClient() error {
 		return err;
 	}
 	ctx := context.Background();
-	reader, err := DockerClient.ImagePull(ctx, "gcc:latest", image.PullOptions{})
+	reader, err := DockerClient.ImagePull(ctx, "gcc:latest", client.ImagePullOptions{})
 	if err != nil {
 		return err;
 	}

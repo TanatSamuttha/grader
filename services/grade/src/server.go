@@ -7,8 +7,8 @@ import (
 	"grade/middleware"
 	"log"
 
+	"github.com/gofiber/contrib/v3/websocket"
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/contrib/websocket"
 	"github.com/joho/godotenv"
 )
 

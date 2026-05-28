@@ -1,48 +1,47 @@
 package logic
 
 import (
+	"grade/config"
 	"bytes"
 	"context"
 	"errors"
-	"grade/config"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/moby/moby/api/pkg/stdcopy"
+	"github.com/moby/moby/client"
 )
 
-func Compile(resp *container.CreateResponse, ctx context.Context) (string, string, error) {
-	execResp, err := config.DockerClient.ContainerExecCreate(
+func Compile(resp *client.ContainerCreateResult, ctx context.Context) (string, string, error) {
+	execResp, err := config.DockerClient.ExecCreate(
 		ctx,
 		(*resp).ID,
-		types.ExecConfig{
+		client.ExecCreateOptions{
 			Cmd: []string{
 				"g++",
 				"/workspace/main.cpp",
 				"-o",
 				"/workspace/main",
 			},
-			AttachStdin: false,
+			AttachStdin:  false,
 			AttachStdout: true,
 			AttachStderr: true,
 		},
-	);
+	)
 	if err != nil {
-		return "", "", errors.New("Error create execute -> " + err.Error());
+		return "", "", errors.New("Error create execute -> " + err.Error())
 	}
 
-	attachResp, err := config.DockerClient.ContainerExecAttach(
+	attachResp, err := config.DockerClient.ExecAttach(
 		ctx,
 		execResp.ID,
-		types.ExecStartCheck{},
-	);
+		client.ExecAttachOptions{},
+	)
 	if err != nil {
-		return "", "", errors.New("Error attach execute -> " + err.Error());
+		return "", "", errors.New("Error attach execute -> " + err.Error())
 	}
 
-	defer attachResp.Close();
-	stdout := new(bytes.Buffer);
-	stderr := new(bytes.Buffer);
+	defer attachResp.Close()
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
 
 	_, err = stdcopy.StdCopy(stdout, stderr, attachResp.Reader)
 	if err != nil {
@@ -50,8 +49,8 @@ func Compile(resp *container.CreateResponse, ctx context.Context) (string, strin
 	}
 
 	if stderr.Len() > 0 {
-		return "", stderr.String(), nil;
+		return "", stderr.String(), nil
 	}
 
-	return stdout.String(), "", nil;
+	return stdout.String(), "", nil
 }

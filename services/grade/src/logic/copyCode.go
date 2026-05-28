@@ -7,11 +7,10 @@ import (
 	"errors"
 	"grade/config"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/client"
 )
 
-func CopyCode(code []byte, resp *container.CreateResponse, ctx context.Context) error {
+func CopyCode(code []byte, resp *client.ContainerCreateResult, ctx context.Context) error {
 	var buffer bytes.Buffer;
 	tw := tar.NewWriter(&buffer);
 
@@ -25,12 +24,13 @@ func CopyCode(code []byte, resp *container.CreateResponse, ctx context.Context) 
 	tw.Write(code);
 	tw.Close();
 
-	err := config.DockerClient.CopyToContainer(
+	_, err := config.DockerClient.CopyToContainer(
 		ctx,
 		(*resp).ID,
-		"/workspace",
-		&buffer,
-		types.CopyToContainerOptions{},
+		client.CopyToContainerOptions{
+			DestinationPath: "/workspace",
+			Content: &buffer,
+		},
 	);
 	if err != nil {
 		return errors.New("Error copy code to container -> " + err.Error());

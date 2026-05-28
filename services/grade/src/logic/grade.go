@@ -7,10 +7,10 @@ import (
 	"log"
 	"strings"
 
-	"github.com/docker/docker/api/types/container"
+	"github.com/moby/moby/client"
 )
 
-func Grade(job models.Job, resp *container.CreateResponse, ctx context.Context) error {
+func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Context) error {
 	log.Println(job);
 	log.Println(*resp);
 	err := CopyCode([]byte(job.Code), resp, ctx);

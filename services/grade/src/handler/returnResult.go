@@ -3,7 +3,7 @@ package handler
 import (
 	"grade/logic"
 
-	"github.com/gofiber/contrib/websocket"
+	"github.com/gofiber/contrib/v3/websocket"
 )
 
 func ReturnResult(conn *websocket.Conn) {
