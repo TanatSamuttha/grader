@@ -43,6 +43,8 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		}
 
 		output := outputs[i];
+
+		var gradeResDTO models.GradeResDTO;
 		
 		execOutput, execErr,  err := Execute(&input, resp, ctx);
 		if err != nil {
@@ -50,6 +52,12 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		}
 		if len(execErr) > 0 {
 			gradeRes[i] = false;
+			gradeResDTO = models.GradeResDTO{
+				JobID: job.ID,
+				Task: i,
+				Result: false,
+				Error: execErr,
+			}
 			log.Println("Execution error: " + execErr);
 		}
 		
@@ -62,11 +70,25 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		if output == execOutput {
 			gradeRes[i] = true;
 			score++;
+			gradeResDTO = models.GradeResDTO{
+				JobID: job.ID,
+				Task: i,
+				Result: true,
+				Error: "",
+			}
 			log.Println("correct");
 		} else {
 			gradeRes[i] = false;
+			gradeResDTO = models.GradeResDTO{
+				JobID: job.ID,
+				Task: i,
+				Result: false,
+				Error: "",
+			}
 			log.Println("wrong");
 		}
+
+		GradeResBuffer <- gradeResDTO;
 	}
 
 	return nil;

@@ -37,6 +37,7 @@ func SendResult(GradeResBuffer <- chan models.GradeResDTO) {
 		res.JobID = "";
 
 		resJson, err := json.Marshal(res);
+		log.Println("send -> " + string(resJson));
 		if err != nil {
 			log.Println("Error json marshal -> " + err.Error());
 		}
