@@ -97,6 +97,8 @@ func worker(jobs <-chan models.Job) {
 		delete(SocketMap, job.ID);
 		SocketMutex.Unlock();
 
-		conn.Close();
+		if conn != nil {
+			conn.Close();
+		}
 	}
 }
