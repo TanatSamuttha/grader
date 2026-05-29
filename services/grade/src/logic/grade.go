@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"grade/config"
 	"grade/models"
 	"log"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gofiber/contrib/v3/websocket"
 	"github.com/moby/moby/client"
+	"gorm.io/gorm"
 )
 
 func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Context) error {
@@ -117,6 +119,16 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		} else {
 			log.Println("No WebSocket connection. Skip result sending");
 		}
+	}
+	
+	submission := models.Submission{
+		UID: job.UID,
+		Score: 100 * (score / len(inputs)),
+	}
+
+	err = gorm.G[models.Submission](config.DB).Create(ctx, &submission);
+	if err != nil {
+		return errors.New("Error create new submission history -> " + err.Error());
 	}
 
 	return nil;
