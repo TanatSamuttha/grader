@@ -5,43 +5,38 @@ import (
 	"grade/models"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/gofiber/contrib/v3/websocket"
 )
 
 var SocketMap map[string]*websocket.Conn;
 
-var SocketMutex sync.RWMutex
+var SocketMutex sync.RWMutex;
 
-var GradeResBuffer chan models.GradeResDTO = make(chan models.GradeResDTO);
+var GradeResBuffer chan models.GradeResJob = make(chan models.GradeResJob);
 
-func SendResult(GradeResBuffer <- chan models.GradeResDTO) {
+func SendResult() {
+	SocketMap = make(map[string]*websocket.Conn);
 	for res := range GradeResBuffer {
 		jobID := res.JobID;
+		log.Println("Assign websocket job" + jobID);
 
-		var conn *websocket.Conn
-
-		for {
-			SocketMutex.RLock()
-			conn = SocketMap[jobID]
-			SocketMutex.RUnlock()
-
-			if conn != nil {
-				break
-			}
-
-			time.Sleep(200 * time.Millisecond);
+		resDTO := models.GradeResDTO{
+			Task: res.Task,
+			Result: res.Result,
+			Error: res.Error,
 		}
 
-		res.JobID = "";
-
-		resJson, err := json.Marshal(res);
+		resJson, err := json.Marshal(resDTO);
 		log.Println("send -> " + string(resJson));
 		if err != nil {
 			log.Println("Error json marshal -> " + err.Error());
 		}
 
-		conn.WriteMessage(websocket.TextMessage, resJson);
+		conn := res.Conn;
+		err = conn.WriteMessage(websocket.TextMessage, resJson)
+		if err != nil {
+			log.Println("write websocket error ->", err.Error())
+		}
 	}
 }

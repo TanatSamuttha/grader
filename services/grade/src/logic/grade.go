@@ -6,7 +6,9 @@ import (
 	"grade/models"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/gofiber/contrib/v3/websocket"
 	"github.com/moby/moby/client"
 )
 
@@ -36,6 +38,8 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 
 	gradeRes := make([]bool, len(inputs));
 	score := 0;
+	
+	var conn *websocket.Conn;
 
 	for i, input:= range inputs {
 		if input[len(input) - 1] != '\n' {
@@ -44,7 +48,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 
 		output := outputs[i];
 
-		var gradeResDTO models.GradeResDTO;
+		var gradeResJob models.GradeResJob;
 		
 		execOutput, execErr,  err := Execute(&input, resp, ctx);
 		if err != nil {
@@ -52,7 +56,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		}
 		if len(execErr) > 0 {
 			gradeRes[i] = false;
-			gradeResDTO = models.GradeResDTO{
+			gradeResJob = models.GradeResJob{
 				JobID: job.ID,
 				Task: i,
 				Result: false,
@@ -70,7 +74,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		if output == execOutput {
 			gradeRes[i] = true;
 			score++;
-			gradeResDTO = models.GradeResDTO{
+			gradeResJob = models.GradeResJob{
 				JobID: job.ID,
 				Task: i,
 				Result: true,
@@ -79,7 +83,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			log.Println("correct");
 		} else {
 			gradeRes[i] = false;
-			gradeResDTO = models.GradeResDTO{
+			gradeResJob = models.GradeResJob{
 				JobID: job.ID,
 				Task: i,
 				Result: false,
@@ -88,7 +92,31 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			log.Println("wrong");
 		}
 
-		GradeResBuffer <- gradeResDTO;
+		
+		if i == 0 {
+			maxRetry := 10;
+			for j := 0; j < maxRetry; j++ {
+				SocketMutex.RLock();
+				conn = SocketMap[job.ID];
+				SocketMutex.RUnlock();
+				
+				if conn != nil {
+					break;
+				}
+
+				time.Sleep(1000 * time.Millisecond);
+			}
+		}
+
+		gradeResJob.Conn = conn;
+
+		log.Println(gradeResJob);
+
+		if gradeResJob.Conn != nil {
+			GradeResBuffer <- gradeResJob;
+		} else {
+			log.Println("No WebSocket connection. Skip result sending");
+		}
 	}
 
 	return nil;

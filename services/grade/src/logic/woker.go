@@ -5,6 +5,7 @@ import (
 	"grade/config"
 	"grade/models"
 	"log"
+	"sync"
 
 	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
@@ -12,10 +13,13 @@ import (
 
 var jobs chan models.Job;
 
+var WorkingJobs map[string]bool = make(map[string]bool);
+var WorkingJobsMutex sync.RWMutex;
+
 func SummonWorkers(n int) {
 	jobs = make(chan models.Job, n);
 	for i := 0; i < n; i++ {
-		go worker(jobs);
+		go worker();
 	}
 }
 
@@ -23,9 +27,13 @@ func CallWorker(job models.Job) {
 	jobs <- job;
 }
 
-func worker(jobs <-chan models.Job) {
+func worker() {
 	ctx := context.Background();
 	for job := range jobs {
+		WorkingJobsMutex.Lock();
+		WorkingJobs[job.ID] = true;
+		WorkingJobsMutex.Unlock();
+
 		resp, err := config.DockerClient.ContainerCreate(
 			ctx,
 			client.ContainerCreateOptions{
@@ -97,8 +105,13 @@ func worker(jobs <-chan models.Job) {
 		delete(SocketMap, job.ID);
 		SocketMutex.Unlock();
 
+		WorkingJobsMutex.Lock();
+		delete(WorkingJobs, job.ID);
+		WorkingJobsMutex.Unlock();
+
 		if conn != nil {
 			conn.Close();
+			log.Println("WebSocket connection closed");
 		}
 	}
 }

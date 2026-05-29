@@ -32,6 +32,8 @@ func main() {
 
 	logic.SummonWorkers(2);
 
+	go logic.SendResult();
+
 	app := fiber.New();
 
 	app.Use("/grade", middleware.VerifyToken);

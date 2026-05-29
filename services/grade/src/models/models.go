@@ -1,5 +1,7 @@
 package models
 
+import "github.com/gofiber/contrib/v3/websocket"
+
 type Problem struct {
 	ID            uint32 `gorm:"primaryKey"`
 	ProblemID     string `gorm:"unique"`
@@ -35,9 +37,16 @@ type CodeDTO struct {
 	Lang string `json:"lang"`
 }
 
+type GradeResJob struct {
+	JobID  string
+	Task   int
+	Result bool
+	Error  string
+	Conn   *websocket.Conn
+}
+
 type GradeResDTO struct {
-	JobID	string
-	Task 	int
-	Result 	bool
-	Error	string
+	Task   int
+	Result bool
+	Error  string
 }
