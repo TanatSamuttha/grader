@@ -30,10 +30,6 @@ func CallWorker(job models.Job) {
 func worker() {
 	ctx := context.Background();
 	for job := range jobs {
-		WorkingJobsMutex.Lock();
-		WorkingJobs[job.ID] = true;
-		WorkingJobsMutex.Unlock();
-
 		resp, err := config.DockerClient.ContainerCreate(
 			ctx,
 			client.ContainerCreateOptions{

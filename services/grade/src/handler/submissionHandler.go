@@ -31,6 +31,10 @@ func SubmissionHandler(ctx fiber.Ctx) error {
 		Lang: lang,
 	};
 	log.Println(job);
+	
+	logic.WorkingJobsMutex.Lock();
+	logic.WorkingJobs[job.ID] = true;
+	logic.WorkingJobsMutex.Unlock();
 
 	logic.CallWorker(job);
 
