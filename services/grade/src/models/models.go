@@ -1,6 +1,10 @@
 package models
 
-import "github.com/gofiber/contrib/v3/websocket"
+import (
+	"time"
+
+	"github.com/gofiber/contrib/v3/websocket"
+)
 
 type Problem struct {
 	ID            uint32 `gorm:"primaryKey"`
@@ -49,4 +53,11 @@ type GradeResDTO struct {
 	Task   int
 	Result bool
 	Error  string
+}
+
+type Submission struct {
+	ID			int		`gorm:"primaryKey"`
+	UID			string
+	Score		int
+	CreatedAt	time.Time
 }
