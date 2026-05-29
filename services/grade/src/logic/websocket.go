@@ -23,7 +23,8 @@ func SendResult() {
 
 		resDTO := models.GradeResDTO{
 			Task: res.Task,
-			Result: res.Result,
+			Score: res.Score,
+			Compile: res.Compile,
 			Error: res.Error,
 		}
 

@@ -42,22 +42,25 @@ type CodeDTO struct {
 }
 
 type GradeResJob struct {
-	JobID  string
-	Task   int
-	Result bool
-	Error  string
-	Conn   *websocket.Conn
+	JobID  	string
+	Task   	int
+	Score	bool
+	Compile	bool
+	Error  	string
+	Conn   	*websocket.Conn
 }
 
 type GradeResDTO struct {
-	Task   int
-	Result bool
-	Error  string
+	Task   	int
+	Score 	bool
+	Compile bool
+	Error  	string
 }
 
 type Submission struct {
 	ID			int		`gorm:"primaryKey"`
 	UID			string
 	Score		int
+	Error		string
 	CreatedAt	time.Time
 }

@@ -27,103 +27,118 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 	if err != nil {
 		return errors.New("Error compile -> " + err.Error());
 	}
-	if len(compileError) > 0 {
-		return errors.New("Compile error: -> " + compileError);
-	}
 
-	inputs, outputs, err := GetTestcases(job.ProblemID);
-	log.Println(inputs);
-	log.Println(outputs);
-	if err != nil {
-		return errors.New("Error get test cases -> " + err.Error());
-	}
-
-	gradeRes := make([]bool, len(inputs));
-	score := 0;
-	
+	var submission models.Submission;
+	var gradeResJob models.GradeResJob;
 	var conn *websocket.Conn;
 
-	for i, input:= range inputs {
-		if input[len(input) - 1] != '\n' {
-			input += "\n";
+	maxRetry := 10;
+	for j := 0; j < maxRetry; j++ {
+		SocketMutex.RLock();
+		conn = SocketMap[job.ID];
+		SocketMutex.RUnlock();
+					
+		if conn != nil {
+			break;
 		}
 
-		output := outputs[i];
-
-		var gradeResJob models.GradeResJob;
-		
-		execOutput, execErr,  err := Execute(&input, resp, ctx);
-		if err != nil {
-			return errors.New("Error execute -> " + err.Error());
-		}
-		if len(execErr) > 0 {
-			gradeRes[i] = false;
-			gradeResJob = models.GradeResJob{
-				JobID: job.ID,
-				Task: i,
-				Result: false,
-				Error: execErr,
-			}
-			log.Println("Execution error: " + execErr);
-		}
-		
-		output = strings.TrimRight(output, " \t\r\n");
-		execOutput = strings.TrimRight(execOutput, " \t\r\n");
-		log.Printf("input      -> %q", input);
-		log.Printf("output     -> %q", output);
-		log.Printf("execOutput -> %q", execOutput);
-
-		if output == execOutput {
-			gradeRes[i] = true;
-			score++;
-			gradeResJob = models.GradeResJob{
-				JobID: job.ID,
-				Task: i,
-				Result: true,
-				Error: "",
-			}
-			log.Println("correct");
-		} else {
-			gradeRes[i] = false;
-			gradeResJob = models.GradeResJob{
-				JobID: job.ID,
-				Task: i,
-				Result: false,
-				Error: "",
-			}
-			log.Println("wrong");
-		}
-
-		
-		if i == 0 {
-			maxRetry := 10;
-			for j := 0; j < maxRetry; j++ {
-				SocketMutex.RLock();
-				conn = SocketMap[job.ID];
-				SocketMutex.RUnlock();
-				
-				if conn != nil {
-					break;
-				}
-
-				time.Sleep(1000 * time.Millisecond);
-			}
-		}
-
-		gradeResJob.Conn = conn;
-
-		log.Println(gradeResJob);
-
-		if gradeResJob.Conn != nil {
-			GradeResBuffer <- gradeResJob;
-		} else {
-			log.Println("No WebSocket connection. Skip result sending");
-		}
+		time.Sleep(1000 * time.Millisecond);
 	}
-	
-	submission := models.Submission{
-		UID: job.UID,
-		Score: 100 * (score / len(inputs)),
+
+	if len(compileError) > 0 {
+		log.Println(errors.New("Compile error: -> " + compileError));
+		gradeResJob = models.GradeResJob{
+			JobID: job.ID,
+			Task: 0,
+			Score: false,
+			Compile: false,
+			Error: compileError,
+		}
+		submission = models.Submission{
+			UID: job.UID,
+			Score: 0,
+			Error: compileError,
+		}
+		
+	} else {
+
+		inputs, outputs, err := GetTestcases(job.ProblemID);
+		log.Println(inputs);
+		log.Println(outputs);
+		if err != nil {
+			return errors.New("Error get test cases -> " + err.Error());
+		}
+
+		gradeRes := make([]bool, len(inputs));
+		score := 0;
+
+		for i, input:= range inputs {
+			if input[len(input) - 1] != '\n' {
+				input += "\n";
+			}
+
+			output := outputs[i];
+			
+			execOutput, execErr,  err := Execute(&input, resp, ctx);
+			if err != nil {
+				return errors.New("Error execute -> " + err.Error());
+			}
+			if len(execErr) > 0 {
+				gradeRes[i] = false;
+				gradeResJob = models.GradeResJob{
+					JobID: job.ID,
+					Task: i,
+					Score: false,
+					Compile: true,
+					Error: execErr,
+				}
+				log.Println("Execution error: " + execErr);
+			}
+			
+			output = strings.TrimRight(output, " \t\r\n");
+			execOutput = strings.TrimRight(execOutput, " \t\r\n");
+			log.Printf("input      -> %q", input);
+			log.Printf("output     -> %q", output);
+			log.Printf("execOutput -> %q", execOutput);
+
+			if output == execOutput {
+				gradeRes[i] = true;
+				score++;
+				gradeResJob = models.GradeResJob{
+					JobID: job.ID,
+					Task: i,
+					Score: true,
+					Compile: true,
+					Error: "",
+				}
+				log.Println("correct");
+			} else {
+				gradeRes[i] = false;
+				gradeResJob = models.GradeResJob{
+					JobID: job.ID,
+					Task: i,
+					Score: false,
+					Compile: true,
+					Error: "",
+				}
+				log.Println("wrong");
+			}
+
+			gradeResJob.Conn = conn;
+			log.Println(gradeResJob);
+
+			if gradeResJob.Conn != nil {
+				GradeResBuffer <- gradeResJob;
+			} else {
+				log.Println("No WebSocket connection. Skip result sending");
+			}
+		}
+		
+		submission = models.Submission{
+			UID: job.UID,
+			Score: 100 * (score / len(inputs)),
+			Error: "",
+		}
 	}
 
 	err = gorm.G[models.Submission](config.DB).Create(ctx, &submission);
