@@ -25,5 +25,5 @@ func main() {
 
 	app.Get("/user/me", middleware.VerifyToken, handler.GetUserData);
 
-	app.Listen("3005");
+	app.Listen(":3005");
 }
