@@ -31,21 +31,13 @@ func main() {
 		return ctx.SendString("Hello problems");
 	});
 
-	app.Post("/problem/new/public/meta", func (ctx fiber.Ctx) error {
-		return handler.NewPublicProblem(ctx);
-	});
+	app.Post("/problem/new/public/meta", handler.NewPublicProblem);
 
-	app.Post("/problem/new/public/files", middleware.CheckSameProblem, func (ctx fiber.Ctx) error {
-		return handler.UploadPublicProblemFile(ctx);
-	});
+	app.Post("/problem/new/public/files", middleware.CheckSameProblem, handler.UploadPublicProblemFile);
 
-	app.Get("/problem/public", func (ctx fiber.Ctx) error {
-		return handler.GetPublicProblems(ctx);
-	});
+	app.Get("/problem/public", handler.GetPublicProblems);
 
-	app.Get("/problem/pdf", func (ctx fiber.Ctx) error {
-		return handler.GetProblemPDF(ctx);
-	});
+	app.Get("/problem/pdf", handler.GetProblemPDF);
 
 	app.Listen(":3001");
 }

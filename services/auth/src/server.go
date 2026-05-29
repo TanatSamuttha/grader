@@ -33,13 +33,9 @@ func main(){
 		return ctx.SendString("Hello auth service");
 	});
 
-	app.Get("/auth/me", middleware.VerifyToken, func (ctx fiber.Ctx) error {
-		return handler.GetUserData(ctx);
-	})
+	app.Get("/auth/me", middleware.VerifyToken, handler.GetUserData);
 
-	app.Post("/auth/google", func (ctx fiber.Ctx) error {
-		return handler.AuthGoogle(ctx);
-	});
+	app.Post("/auth/google", handler.AuthGoogle);
 
 	app.Listen(":3000");
 }
