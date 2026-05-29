@@ -36,3 +36,10 @@ services:
       - "3004:3004"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+
+  user-server:
+    build: ./services/user
+    env_file:
+      - ./services/user/.env
+    ports:
+      - "3005:3005"
