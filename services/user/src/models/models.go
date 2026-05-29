@@ -10,3 +10,8 @@ type User struct {
 	Role		string
 	Version 	uint16
 }
+
+type UserDTO struct {
+	Username 	string	`json:"username"`
+	PhotoURL 	string	`json:"photoURL"`
+}

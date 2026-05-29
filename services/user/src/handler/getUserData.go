@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"auth/config"
-	"auth/models"
+	"user/config"
+	"user/models"
 	"log"
 
 	"github.com/gofiber/fiber/v3"

@@ -8,7 +8,6 @@ import (
 
 	"auth/config"
 	"auth/handler"
-	"auth/middleware"
 )
 
 func main(){
@@ -32,8 +31,6 @@ func main(){
 	app.Get("/auth", func (ctx fiber.Ctx) error {
 		return ctx.SendString("Hello auth service");
 	});
-
-	app.Get("/auth/me", middleware.VerifyToken, handler.GetUserData);
 
 	app.Post("/auth/google", handler.AuthGoogle);
 
