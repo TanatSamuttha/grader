@@ -12,8 +12,8 @@ type Problem struct {
 	Name          string
 	AuthorUID     string
 	TestCasesSize uint8
-	TimeLimit     uint8
-	MemoryLimit   uint8
+	TimeLimit     uint64
+	MemoryLimit   uint16
 	Visibility    string
 }
 

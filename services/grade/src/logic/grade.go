@@ -111,7 +111,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			output := outputs[i];
 			
 			// Execute code
-			execOutput, execErr, memory, time, err := Execute(&input, resp, ctx);
+			execOutput, execErr, memory, time, err := Execute(&input, problem.TimeLimit, resp, ctx);
 			if err != nil {
 				return errors.New("Error execute -> " + err.Error());
 			}
@@ -163,6 +163,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			log.Printf("execOutput -> %q", execOutput);
 			log.Println("Memory    -> " + strconv.Itoa(memory));
 			log.Println("Time      -> " + strconv.Itoa(time));
+			log.Println("Time      -> " + strconv.Itoa(int(problem.TimeLimit)));
 
 			if output == execOutput {
 				gradeRes[i] = true;
