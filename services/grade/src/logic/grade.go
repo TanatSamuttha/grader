@@ -158,12 +158,13 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			// Compare output and expected output
 			output = strings.TrimRight(output, " \t\r\n");
 			execOutput = strings.TrimRight(execOutput, " \t\r\n");
+			log.Printf("Task       -> %d", i);
 			log.Printf("input      -> %q", input);
 			log.Printf("output     -> %q", output);
 			log.Printf("execOutput -> %q", execOutput);
-			log.Println("Memory    -> " + strconv.Itoa(memory));
-			log.Println("Time      -> " + strconv.Itoa(time));
-			log.Println("Time      -> " + strconv.Itoa(int(problem.TimeLimit)));
+			log.Println("Memory     -> " + strconv.Itoa(memory));
+			log.Println("Time       -> " + strconv.Itoa(time));
+			log.Println("Time       -> " + strconv.Itoa(int(problem.TimeLimit)));
 
 			if output == execOutput {
 				gradeRes[i] = true;
