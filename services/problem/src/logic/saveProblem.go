@@ -53,7 +53,7 @@ func SaveProblem(problemID string, problemPDF *multipart.FileHeader, testcasesZi
 
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"http://storage-server:3002/storage/upload/problem",
+		os.Getenv("STORAGE_SERVER_URL"),
 		&body,
 	)
 	if err != nil {

@@ -22,7 +22,7 @@ type testcase struct {
 func GetTestcases(problemID string) ([]string, []string, error) {
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"http://storage-server:3002/storage/get/testcases",
+		os.Getenv("STORAGE_SERVER_URL"),
 		nil,
 	)
 	if err != nil {

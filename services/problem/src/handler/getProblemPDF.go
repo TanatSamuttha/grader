@@ -12,7 +12,7 @@ import (
 func GetProblemPDF(ctx fiber.Ctx) error {
 	req, err := http.NewRequest(
 		http.MethodGet,
-		"http://storage-server:3002/storage/get/problem",
+		os.Getenv("STORAGE_SERVER_URL"),
 		nil,
 	);
 
