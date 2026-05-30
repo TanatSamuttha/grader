@@ -41,7 +41,14 @@ func worker() {
 						"infinity",
 					},
 					Tty: false,
-				},	
+				},
+				HostConfig: &container.HostConfig{
+					Resources: container.Resources{
+						Memory:     512 * 1024 * 1024,
+						MemorySwap: 512 * 1024 * 1024,
+						NanoCPUs:   1_000_000_000,
+					},
+				},
 			},
 		);
 		if err != nil {

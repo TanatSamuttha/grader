@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gofiber/contrib/v3/websocket"
+	"github.com/moby/moby/api/types/container"
 	"github.com/moby/moby/client"
 	"gorm.io/gorm"
 )
@@ -29,7 +30,6 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 	}
 
 	var submission models.Submission;
-	var gradeResJob models.GradeResJob;
 	var conn *websocket.Conn;
 
 	maxRetry := 10;
@@ -47,13 +47,16 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 
 	if len(compileError) > 0 {
 		log.Println(errors.New("Compile error: -> " + compileError));
-		gradeResJob = models.GradeResJob{
-			JobID: job.ID,
-			Task: 0,
-			Score: false,
-			Compile: false,
-			Error: compileError,
-		}
+		afterGrade(
+			models.GradeResJob{
+				JobID: job.ID,
+				Task: 0,
+				Score: false,
+				Compile: true,
+				Error: compileError,
+			},
+			conn,
+		)
 		submission = models.Submission{
 			UID: job.UID,
 			Score: 0,
@@ -72,6 +75,20 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		gradeRes := make([]bool, len(inputs));
 		score := 0;
 
+		_, err = config.DockerClient.ContainerUpdate(
+			ctx,
+			resp.ID,
+			client.ContainerUpdateOptions{
+				Resources: &container.Resources{
+					Memory: 6 * 1024 * 1024,
+					MemorySwap: 6 * 1024 * 1024,
+				},
+			},
+		);
+		if err != nil {
+			return errors.New("Error update container resources -> " + err.Error());
+		}
+
 		for i, input:= range inputs {
 			if input[len(input) - 1] != '\n' {
 				input += "\n";
@@ -79,20 +96,47 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 
 			output := outputs[i];
 			
-			execOutput, execErr,  err := Execute(&input, resp, ctx);
+			execOutput, execErr, err := Execute(&input, resp, ctx);
 			if err != nil {
 				return errors.New("Error execute -> " + err.Error());
 			}
 			if len(execErr) > 0 {
 				gradeRes[i] = false;
-				gradeResJob = models.GradeResJob{
-					JobID: job.ID,
-					Task: i,
-					Score: false,
-					Compile: true,
-					Error: execErr,
-				}
+				afterGrade(
+					models.GradeResJob{
+						JobID: job.ID,
+						Task: i,
+						Score: false,
+						Compile: true,
+						Error: execErr,
+					},
+					conn,
+				)
 				log.Println("Execution error: " + execErr);
+				continue;
+			}
+
+			inspect, err := config.DockerClient.ContainerInspect(
+				ctx, 
+				resp.ID,
+				client.ContainerInspectOptions{},
+			);
+			if err != nil {
+				return errors.New("Error container inspect -> " + err.Error());
+			}
+			if inspect.Container.State != nil && inspect.Container.State.OOMKilled {
+				afterGrade(
+					models.GradeResJob{
+						JobID: job.ID,
+						Task: i,
+						Score: false,
+						Compile: true,
+						Error: "Memory limit exceed",
+					},
+					conn,
+				)
+				log.Println("Memmory limit exceed");
+				continue;
 			}
 			
 			output = strings.TrimRight(output, " \t\r\n");
@@ -104,33 +148,32 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			if output == execOutput {
 				gradeRes[i] = true;
 				score++;
-				gradeResJob = models.GradeResJob{
-					JobID: job.ID,
-					Task: i,
-					Score: true,
-					Compile: true,
-					Error: "",
-				}
+				afterGrade(
+					models.GradeResJob{
+						JobID: job.ID,
+						Task: i,
+						Score: true,
+						Compile: true,
+						Error: "",
+					},
+					conn,
+				)
 				log.Println("correct");
+				continue;
 			} else {
 				gradeRes[i] = false;
-				gradeResJob = models.GradeResJob{
-					JobID: job.ID,
-					Task: i,
-					Score: false,
-					Compile: true,
-					Error: "",
-				}
+				afterGrade(
+					models.GradeResJob{
+						JobID: job.ID,
+						Task: i,
+						Score: false,
+						Compile: true,
+						Error: "",
+					},
+					conn,
+				)
 				log.Println("wrong");
-			}
-
-			gradeResJob.Conn = conn;
-			log.Println(gradeResJob);
-
-			if gradeResJob.Conn != nil {
-				GradeResBuffer <- gradeResJob;
-			} else {
-				log.Println("No WebSocket connection. Skip result sending");
+				continue;
 			}
 		}
 		
@@ -147,4 +190,15 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 	}
 
 	return nil;
+}
+
+func afterGrade(gradeResJob models.GradeResJob, conn *websocket.Conn){
+	gradeResJob.Conn = conn;
+	log.Println(gradeResJob);
+
+	if gradeResJob.Conn != nil {
+		GradeResBuffer <- gradeResJob;
+	} else {
+		log.Println("No WebSocket connection. Skip result sending");
+	}
 }
