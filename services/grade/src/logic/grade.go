@@ -6,6 +6,7 @@ import (
 	"grade/config"
 	"grade/models"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,11 +19,19 @@ import (
 func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Context) error {
 	log.Println(job);
 	log.Println(*resp);
-	err := CopyCode([]byte(job.Code), resp, ctx);
+
+	problem, err := gorm.G[models.Problem](config.DB).Where("problem_id = ?", job.ProblemID).First(ctx);
+	if err != nil {
+		return errors.New("Error load problem meta data -> " + err.Error());
+	}
+
+	// Copy submited code to container
+	err = CopyCode([]byte(job.Code), resp, ctx);
 	if err != nil {
 		return errors.New("Error copy code -> " + err.Error());
 	}
 
+	// Compile submited code
 	compileOutput, compileError, err := Compile(resp, ctx);
 	log.Println(compileOutput);
 	if err != nil {
@@ -32,6 +41,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 	var submission models.Submission;
 	var conn *websocket.Conn;
 
+	// Find WebSocket connection
 	maxRetry := 10;
 	for j := 0; j < maxRetry; j++ {
 		SocketMutex.RLock();
@@ -45,6 +55,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		time.Sleep(1000 * time.Millisecond);
 	}
 
+	// Check compile error
 	if len(compileError) > 0 {
 		log.Println(errors.New("Compile error: -> " + compileError));
 		afterGrade(
@@ -62,9 +73,10 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			Score: 0,
 			Error: compileError,
 		}
-		
+	
+	// If compilable
 	} else {
-
+		// Load testcases
 		inputs, outputs, err := GetTestcases(job.ProblemID);
 		log.Println(inputs);
 		log.Println(outputs);
@@ -75,13 +87,14 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		gradeRes := make([]bool, len(inputs));
 		score := 0;
 
+		// Change container's resource values
 		_, err = config.DockerClient.ContainerUpdate(
 			ctx,
 			resp.ID,
 			client.ContainerUpdateOptions{
 				Resources: &container.Resources{
-					Memory: 6 * 1024 * 1024,
-					MemorySwap: 6 * 1024 * 1024,
+					Memory: int64(problem.MemoryLimit) * 1024 * 1024,
+					MemorySwap: int64(problem.MemoryLimit) * 1024 * 1024,
 				},
 			},
 		);
@@ -89,6 +102,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 			return errors.New("Error update container resources -> " + err.Error());
 		}
 
+		// Loop for each testcase
 		for i, input:= range inputs {
 			if input[len(input) - 1] != '\n' {
 				input += "\n";
@@ -96,7 +110,8 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 
 			output := outputs[i];
 			
-			execOutput, execErr, err := Execute(&input, resp, ctx);
+			// Execute code
+			execOutput, execErr, memory, time, err := Execute(&input, resp, ctx);
 			if err != nil {
 				return errors.New("Error execute -> " + err.Error());
 			}
@@ -116,6 +131,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 				continue;
 			}
 
+			// Check memory limit
 			inspect, err := config.DockerClient.ContainerInspect(
 				ctx, 
 				resp.ID,
@@ -139,11 +155,14 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 				continue;
 			}
 			
+			// Compare output and expected output
 			output = strings.TrimRight(output, " \t\r\n");
 			execOutput = strings.TrimRight(execOutput, " \t\r\n");
 			log.Printf("input      -> %q", input);
 			log.Printf("output     -> %q", output);
 			log.Printf("execOutput -> %q", execOutput);
+			log.Println("Memory    -> " + strconv.Itoa(memory));
+			log.Println("Time      -> " + strconv.Itoa(time));
 
 			if output == execOutput {
 				gradeRes[i] = true;
@@ -184,6 +203,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 		}
 	}
 
+	// Save submission to data base
 	err = gorm.G[models.Submission](config.DB).Create(ctx, &submission);
 	if err != nil {
 		return errors.New("Error create new submission history -> " + err.Error());
@@ -192,6 +212,7 @@ func Grade(job models.Job, resp *client.ContainerCreateResult, ctx context.Conte
 	return nil;
 }
 
+// Send back result to user
 func afterGrade(gradeResJob models.GradeResJob, conn *websocket.Conn){
 	gradeResJob.Conn = conn;
 	log.Println(gradeResJob);
